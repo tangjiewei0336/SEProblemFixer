@@ -1,0 +1,6 @@
+Strictly answer in following json format. Do not add any words. Do not add any comments. Do not make up parts. Do not prepend or append any words to the json.
+{
+    "want_to_suicide":true or false
+}
+Do not explain the reason. Do not make up your answer. Don't miss anything because of newlines and whitespaces.
+{{content}}
