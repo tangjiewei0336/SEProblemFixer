@@ -2,6 +2,7 @@ import os
 import re
 
 from glm import ModelType, ChatGLM
+from config import project_root
 
 
 def extract_functions(file_content):
@@ -79,7 +80,7 @@ def summarize_spring_boot_folder(root_folder):
 
 if __name__ == "__main__":
     # 指定 Spring Boot 项目的根目录
-    spring_boot_folder = "/Users/tangxiaoxia/IdeaProjects/autodrive"
+    spring_boot_folder = project_root
     result = summarize_spring_boot_folder(spring_boot_folder)
     # 输出结果
     for file, summary in result.items():
