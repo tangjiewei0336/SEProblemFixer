@@ -1,0 +1,4 @@
+feat: 修复了getDataset时的老师权限问题 effafa25c65ce93ef90b8922392dfdb9c194bfac
+fix: 修复了对图片进行操作时，缩略图不会更新的问题 52acc656958ce42421cda544b4da988f3d4d0726
+fix: 修改密码时验证旧密码 c770120479533b77032f518ca09823d954adbe1e
+fix: 修复不能查询role的bug e8a288ab10b30d430ff414784a12c9b07b78695e

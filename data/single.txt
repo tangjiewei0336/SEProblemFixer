@@ -1,0 +1,6 @@
+feat: 新增停止训练的功能 eb4d870893e9e6f56db7a75b4ef3b77894d69d84
+feat: 更加频繁地更新用户活跃信息 e6937c19a4a71f349423c72423af66d3b62b617f
+fix: 导入了错误的HttpServletRequest和HttpServletResponse 205f9f8f1cc8385c26bd30e63ffc2602d604fd31
+feat: /train/submitOffline 接口：提交训练完毕的文件 b8da36816369c7f6afc6348baf79d4b43d10de24
+fix: 调整导出数据库时候的文件名为exported_data.zip 473b3fcf7d2a21c026b65957d01a45e6e632dd36
+feat: 增加editModel鉴权 46e6333f01b9191147406de30481bcd8944e63ad
