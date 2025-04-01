@@ -62,9 +62,11 @@ if __name__ == "__main__":
 
             result = model(prompt)
 
-            filename_without_extension = os.path.splitext(filename)[0]
-            result_dir = os.path.join(f'result/locate_with_summary/{timestamp}', filename_without_extension)
+            # 提交对应类别 etc. single, multi, ...
+            data_type = os.path.splitext(filename)[0]
+
+            result_dir = os.path.join(f'result/locate_with_summary/{data_type}', commit_hash)
             os.makedirs(result_dir, exist_ok=True)
-            result_file_path = os.path.join(result_dir, f"{commit_hash}.txt")
+            result_file_path = os.path.join(result_dir, f"{timestamp}.txt")
             with open(result_file_path, 'w', encoding='utf-8') as result_file:
                 result_file.write(str(result))
