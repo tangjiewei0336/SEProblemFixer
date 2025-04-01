@@ -29,3 +29,14 @@ def read_commit(file: str) -> list:
     """
     with open(file, "r", encoding="utf-8") as f:
         return [tuple(line.strip().split(" ")) for line in f.readlines()]
+
+
+def read_prompt(content: str) -> str:
+    """
+    返回prompt, 将{{content}}替换为传入的字符串
+    """
+    file_path = 'prompt_convention'
+    with open(file_path, 'r', encoding='utf-8') as file:
+        prompt = file.read()
+        prompt = prompt.replace("{{content}}", content)
+        return prompt
