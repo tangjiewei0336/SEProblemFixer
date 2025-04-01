@@ -1,3 +1,4 @@
+import datetime
 import json
 import os
 
@@ -60,7 +61,8 @@ if __name__ == "__main__":
             result = model(prompt)
 
             filename_without_extension = os.path.splitext(filename)[0]
-            result_dir = os.path.join('result/locate_with_summary', filename_without_extension)
+            timestamp = datetime.datetime.now().strftime("%Y%m%d%H%M%S")
+            result_dir = os.path.join(f'result/locate_with_summary/{timestamp}', filename_without_extension)
             os.makedirs(result_dir, exist_ok=True)
             result_file_path = os.path.join(result_dir, f"{commit_hash}.txt")
             with open(result_file_path, 'w', encoding='utf-8') as result_file:
