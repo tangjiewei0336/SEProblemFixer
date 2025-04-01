@@ -39,6 +39,8 @@ def generate_summary_string_cached(root_folder: str, comment_hash: str) -> str:
 if __name__ == "__main__":
     spring_boot_folder = project_root
 
+    timestamp = datetime.datetime.now().strftime("%Y%m%d%H%M%S")
+
     # 遍历data文件夹
     data_folder = 'data'
     for filename in os.listdir(data_folder):
@@ -61,7 +63,6 @@ if __name__ == "__main__":
             result = model(prompt)
 
             filename_without_extension = os.path.splitext(filename)[0]
-            timestamp = datetime.datetime.now().strftime("%Y%m%d%H%M%S")
             result_dir = os.path.join(f'result/locate_with_summary/{timestamp}', filename_without_extension)
             os.makedirs(result_dir, exist_ok=True)
             result_file_path = os.path.join(result_dir, f"{commit_hash}.txt")
