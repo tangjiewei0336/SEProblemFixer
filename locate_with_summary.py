@@ -1,6 +1,7 @@
 import datetime
 import json
 import os
+import time
 
 from config import project_root
 from glm import ChatGLM, ModelType
@@ -9,15 +10,15 @@ from utils.files import read_commit, read_prompt
 from utils.git import checkout_to_parent_commit
 
 
-def generate_summary_string(root_folder: str) -> str:
-    summary_result = summarize_spring_boot_folder(root_folder)
+def generate_summary_string(root_folder: str, max_workers=5) -> str:
+    summary_result = summarize_spring_boot_folder(root_folder, max_workers)
     summary_return = ""
     for file, summary in summary_result.items():
         summary_return += f"\n文件：{file}\n摘要：{summary}\n"
     return summary_return
 
 
-def generate_summary_string_cached(root_folder: str, comment_hash: str) -> str:
+def generate_summary_string_cached(root_folder: str, comment_hash: str, max_workers=5) -> str:
     cache_dir = 'cache'
     os.makedirs(cache_dir, exist_ok=True)
     cache_file_path = os.path.join(cache_dir, f"{comment_hash}.json")
@@ -26,7 +27,7 @@ def generate_summary_string_cached(root_folder: str, comment_hash: str) -> str:
         with open(cache_file_path, 'r', encoding='utf-8') as cache_file:
             summary_result = json.load(cache_file)
     else:
-        summary_result = summarize_spring_boot_folder(root_folder)
+        summary_result = summarize_spring_boot_folder(root_folder, max_workers)
         with open(cache_file_path, 'w', encoding='utf-8') as cache_file:
             json.dump(summary_result, cache_file, ensure_ascii=False, indent=4)
 
@@ -39,6 +40,7 @@ def generate_summary_string_cached(root_folder: str, comment_hash: str) -> str:
 if __name__ == "__main__":
     spring_boot_folder = project_root
 
+    start_time = time.time()
     timestamp = datetime.datetime.now().strftime("%Y%m%d%H%M%S")
 
     # 遍历data文件夹
@@ -50,8 +52,8 @@ if __name__ == "__main__":
             commit_type, commit_msg, commit_hash = commit
             checkout_to_parent_commit(project_root, commit_hash)
 
-            # summary_string = generate_summary_string(spring_boot_folder)
-            summary_string = generate_summary_string_cached(spring_boot_folder, commit_hash)
+            summary_string = generate_summary_string(spring_boot_folder, 30)
+            # summary_string = generate_summary_string_cached(spring_boot_folder, commit_hash, 30)
 
             message = (f"Your mission whose type is {commit_type} is to {commit_msg}, here are the summary of "
                        f"codespace.\n")
@@ -70,3 +72,7 @@ if __name__ == "__main__":
             result_file_path = os.path.join(result_dir, f"{timestamp}.txt")
             with open(result_file_path, 'w', encoding='utf-8') as result_file:
                 result_file.write(str(result))
+
+    end_time = time.time()
+    elapsed_time = end_time - start_time
+    print(f"Execution time: {elapsed_time:.2f} seconds")
