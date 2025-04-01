@@ -1,3 +1,4 @@
+import json
 import os
 
 from config import project_root
@@ -9,6 +10,25 @@ from utils.git import checkout_to_parent_commit
 
 def generate_summary_string(root_folder: str) -> str:
     summary_result = summarize_spring_boot_folder(root_folder)
+    summary_return = ""
+    for file, summary in summary_result.items():
+        summary_return += f"\n文件：{file}\n摘要：{summary}\n"
+    return summary_return
+
+
+def generate_summary_string_cached(root_folder: str, comment_hash: str) -> str:
+    cache_dir = 'cache'
+    os.makedirs(cache_dir, exist_ok=True)
+    cache_file_path = os.path.join(cache_dir, f"{comment_hash}.json")
+
+    if os.path.exists(cache_file_path):
+        with open(cache_file_path, 'r', encoding='utf-8') as cache_file:
+            summary_result = json.load(cache_file)
+    else:
+        summary_result = summarize_spring_boot_folder(root_folder)
+        with open(cache_file_path, 'w', encoding='utf-8') as cache_file:
+            json.dump(summary_result, cache_file, ensure_ascii=False, indent=4)
+
     summary_return = ""
     for file, summary in summary_result.items():
         summary_return += f"\n文件：{file}\n摘要：{summary}\n"
@@ -27,7 +47,8 @@ if __name__ == "__main__":
             commit_type, commit_msg, commit_hash = commit
             checkout_to_parent_commit(project_root, commit_hash)
 
-            summary_string = generate_summary_string(spring_boot_folder)
+            # summary_string = generate_summary_string(spring_boot_folder)
+            summary_string = generate_summary_string_cached(spring_boot_folder, commit_hash)
 
             message = (f"Your mission whose type is {commit_type} is to {commit_msg}, here are the summary of "
                        f"codespace.\n")
