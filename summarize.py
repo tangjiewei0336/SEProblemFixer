@@ -4,13 +4,24 @@ import concurrent.futures
 from glm import ModelType, ChatGLM
 
 
+import re
+
 def extract_functions(file_content):
+    pattern = r"""
+        (?:@\w+(?:\s*\([^)]*\))?\s*)*
+        (?:public|private|protected)?
+        \s*
+        (?:static\s+)?
+        [\w<>\[\]]+
+        \s+
+        (\w+)
+        \s*
+        \([^)]*\)
+        \s*
     """
-    利用正则从文件内容中提取函数定义部分（适用于 Java 文件的简单匹配）。
-    """
-    pattern = r'(public|private|protected)\s+(static\s+)?[\w<>\[\]]+\s+(\w+)\s*\(.*?\)\s*\{'
-    matches = re.finditer(pattern, file_content, re.DOTALL)
-    return [match.group(3) for match in matches]
+    matches = re.finditer(pattern, file_content, re.VERBOSE | re.DOTALL)
+    return [match.group(1) for match in matches]
+
 
 
 def generate_prompt(file_path, file_content):
@@ -23,7 +34,7 @@ def generate_prompt(file_path, file_content):
     if functions:
         prompt += "【函数概括】：请分别概括下列函数的功能：\n" + "\n".join(f"- {func}" for func in functions) + "\n"
     else:
-        prompt += "该文件未检测到明显的函数定义，请直接概括文件主体内容。\n"
+        prompt += "该文件未检测到明显的函数定义，请直接概括文件主体内容，如果它是一个实体类，则需要具体地概括其中每一个字段的作用。\n"
     prompt += "\n文件内容如下：\n" + file_content
     return prompt
 
