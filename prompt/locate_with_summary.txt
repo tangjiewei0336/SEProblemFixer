@@ -1,0 +1,16 @@
+Strictly answer in following json format. Do not add any words. Do not add any comments. Do not make up parts. Do not prepend or append any words to the json.
+{
+    {
+        "file": "the_file_name",
+        "function": "the_function_name",
+        "operation": "delete" or "create" or "update",
+    },
+    {
+        ( the second or more file with same format as above if needed )
+    }
+}
+Do not explain the reason. Do not make up your answer. Don't miss anything because of newlines and whitespaces.
+Your task is to analyse the code summary and then try to complement "{{commit_type}}: {{commit_msg}}".
+You need to decide which function is needed to be created, deleted, or updated, and then reply with the format defined above.
+Here are the summary of the codes.
+{{summary}}
