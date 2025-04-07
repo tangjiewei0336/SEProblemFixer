@@ -1,13 +1,13 @@
 Strictly answer in following json format. Do not add any words. Do not add any comments. Do not make up parts. Do not prepend or append any words to the json.
-{
+[
     {
         "file": "the_file_name",
         "function": "the_function_name",
-        "operations": "delete" or "create" or "update",
+        "operation": "delete" or "create" or "update",
     },
     {
         ( the second or more file with same format as above if needed )
     }
-}
+]
 Do not explain the reason. Do not make up your answer. Don't miss anything because of newlines and whitespaces.
 {{content}}
