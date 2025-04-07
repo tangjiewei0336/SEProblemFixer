@@ -46,7 +46,7 @@ def process_commit(commit, timestamp):
     # 保存结果
     result_dir = os.path.join(f'result/locate_with_summary/{data_type}', commit_hash)
     os.makedirs(result_dir, exist_ok=True)
-    result_file_path = os.path.join(result_dir, f"{timestamp}.txt")
+    result_file_path = os.path.join(result_dir, f"{timestamp}.md")
     with open(result_file_path, 'w', encoding='utf-8') as result_file:
         result_file.write(str(result))
     
