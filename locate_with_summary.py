@@ -2,6 +2,7 @@ import datetime
 import json
 import os
 import time
+from concurrent.futures import ThreadPoolExecutor, as_completed
 
 from config import project_root
 from glm import ChatGLM, ModelType
@@ -44,6 +45,31 @@ def read_and_replace_prompt(file_path: str, variables: dict) -> str:
     return prompt
 
 
+def process_commit(commit, spring_boot_folder, project_root, use_cache, timestamp, total_amount):
+    commit_type, commit_msg, commit_hash, filename = commit
+    checkout_to_parent_commit(project_root, commit_hash)
+
+    summary_string = generate_summary_string(spring_boot_folder, commit_hash, 50 / total_amount, use_cache)
+
+    prompt_file_path = 'prompt\\locate_with_summary.txt'
+    variables = {
+        "commit_type": commit_type,
+        "commit_msg": commit_msg,
+        "summary": summary_string,
+    }
+    prompt = read_and_replace_prompt(prompt_file_path, variables)
+
+    model = ChatGLM(model_type=ModelType.GLM_4)
+    result = model(prompt)
+
+    data_type = os.path.splitext(filename)[0]
+    result_dir = os.path.join(f'result/locate_with_summary/{data_type}', commit_hash)
+    os.makedirs(result_dir, exist_ok=True)
+    result_file_path = os.path.join(result_dir, f"{timestamp}.txt")
+    with open(result_file_path, 'w', encoding='utf-8') as result_file:
+        result_file.write(str(result))
+
+
 if __name__ == "__main__":
     spring_boot_folder = project_root
 
@@ -52,40 +78,28 @@ if __name__ == "__main__":
     start_time = time.time()
     timestamp = datetime.datetime.now().strftime("%Y%m%d%H%M%S")
 
-    # 遍历data文件夹
     data_folder = 'data'
+    # commit = [(commit_type, commit_msg, commit_hash, filename)]
+    commits = []
     for filename in os.listdir(data_folder):
         file_path = os.path.join(data_folder, filename)
-        commits = read_commit(file_path)
+        commit = read_commit(file_path)
+        for commit_tuple in commit:
+            commit_type, commit_msg, commit_hash = commit_tuple
+            new_commit = (commit_type, commit_msg, commit_hash, filename)
+            commits.append(new_commit)
+
+    total_amount = len(commits)
+
+    with ThreadPoolExecutor(max_workers=total_amount) as executor:
+        futures = []
         for commit in commits:
-            commit_type, commit_msg, commit_hash = commit
-            checkout_to_parent_commit(project_root, commit_hash)
+            futures.append(
+                executor.submit(process_commit, commit, spring_boot_folder, project_root, use_cache,
+                                timestamp, total_amount))
 
-            if use_cache:
-                summary_string = generate_summary_string(spring_boot_folder, commit_hash, 30, use_cache)
-            else:
-                summary_string = generate_summary_string(spring_boot_folder, commit_hash, 30, use_cache)
-
-            prompt_file_path = 'prompt\\locate_with_summary.txt'
-            variables = {
-                "commit_type": commit_type,
-                "commit_msg": commit_msg,
-                "summary": summary_string,
-            }
-            prompt = read_and_replace_prompt(prompt_file_path, variables)
-
-            model = ChatGLM(model_type=ModelType.GLM_4)
-
-            result = model(prompt)
-
-            # 提交对应类别 etc. single, multi, ...
-            data_type = os.path.splitext(filename)[0]
-
-            result_dir = os.path.join(f'result/locate_with_summary/{data_type}', commit_hash)
-            os.makedirs(result_dir, exist_ok=True)
-            result_file_path = os.path.join(result_dir, f"{timestamp}.txt")
-            with open(result_file_path, 'w', encoding='utf-8') as result_file:
-                result_file.write(str(result))
+        for future in as_completed(futures):
+            future.result()
 
     end_time = time.time()
     elapsed_time = end_time - start_time
