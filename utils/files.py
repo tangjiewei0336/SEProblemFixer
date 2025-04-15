@@ -6,18 +6,20 @@ def read_and_replace_prompt(file_path: str, variables: dict) -> str:
     从指定文件中读取文本，
     并将其中的{{var}}替换成对应的文本。
     """
-    with open(file_path, 'r', encoding='utf-8') as file:
+    with open(file_path, "r", encoding="utf-8") as file:
         prompt = file.read()
     for key, value in variables.items():
         prompt = prompt.replace(f"{{{{{key}}}}}", value)
     return prompt
 
 
-def concat_code_files(root_path: str, filter: callable, use_relative_path: bool = False) -> str:
+def concat_code_files(
+    root_path: str, filter: callable, use_relative_path: bool = False
+) -> str:
     """
     递归遍历路径下所有文件夹中的代码文件，
     将文件名和内容组合成一个字符串
-    
+
     参数：
     root_path: 要遍历的根路径
     filter: 用于过滤文件的函数
@@ -72,3 +74,14 @@ def read_prompt(content: str) -> str:
         prompt = file.read()
         prompt = prompt.replace("{{content}}", content)
         return prompt
+
+
+def get_indexed_content(cotent: str) -> str:
+    """
+    给文件添加行号(1-based)
+    """
+    lines = cotent.split("\n")
+    indexed_content = ""
+    for i, line in enumerate(lines):
+        indexed_content += f"{i + 1}: {line}\n"
+    return indexed_content
