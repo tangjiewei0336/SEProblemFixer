@@ -49,4 +49,6 @@
     <filename>Header.tsx</filename>
   </action>
 </tool>
+
+# NOTE: FILENAME SHOULDN'T BE INCLUDED IN THE FILEPATH!!!
 ````
