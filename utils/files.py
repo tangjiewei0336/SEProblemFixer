@@ -13,10 +13,15 @@ def read_and_replace_prompt(file_path: str, variables: dict) -> str:
     return prompt
 
 
-def concat_code_files(root_path: str, filter: callable) -> str:
+def concat_code_files(root_path: str, filter: callable, use_relative_path: bool = False) -> str:
     """
     递归遍历路径下所有文件夹中的代码文件，
     将文件名和内容组合成一个字符串
+    
+    参数：
+    root_path: 要遍历的根路径
+    filter: 用于过滤文件的函数
+    use_relative_path: 是否使用相对路径作为文件名，默认为False
     """
     result = ""
 
@@ -27,7 +32,12 @@ def concat_code_files(root_path: str, filter: callable) -> str:
                 try:
                     with open(file_path, "r", encoding="utf-8") as f:
                         content = f.read()
-                        result += f"文件名: {file}\n内容:\n{content}\n\n"
+                        if use_relative_path:
+                            relative_path = os.path.relpath(file_path, root_path)
+                            file_display = relative_path
+                        else:
+                            file_display = file
+                        result += f"文件名: {file_display}\n内容:\n{content}\n\n"
                 except Exception as e:
                     print(f"无法读取文件: {file_path}, 原因: {e}")
 
