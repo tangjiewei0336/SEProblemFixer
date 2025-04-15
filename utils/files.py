@@ -76,11 +76,11 @@ def read_prompt(content: str) -> str:
         return prompt
 
 
-def get_indexed_content(cotent: str) -> str:
+def get_indexed_content(content: str) -> str:
     """
     给文件添加行号(1-based)
     """
-    lines = cotent.split("\n")
+    lines = content.split("\n")
     indexed_content = ""
     for i, line in enumerate(lines):
         indexed_content += f"{i + 1}: {line}\n"
