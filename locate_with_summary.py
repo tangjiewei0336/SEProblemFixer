@@ -51,34 +51,33 @@ def process_commit(commit, timestamp):
 
 
 if __name__ == "__main__":
-    while True:
-        spring_boot_folder = project_root
+    spring_boot_folder = project_root
 
-        start_time = time.time()
-        timestamp = datetime.datetime.now().strftime("%Y%m%d%H%M%S")
+    start_time = time.time()
+    timestamp = datetime.datetime.now().strftime("%Y%m%d%H%M%S")
 
-        data_folder = 'data'
-        # 将所有需要测试的commit取出
-        # commit = [(commit_type, commit_msg, commit_hash, filename, summary)]
-        commits = []
-        for filename in os.listdir(data_folder):
-            file_path = os.path.join(data_folder, filename)
-            commit = read_commit(file_path)
-            for commit_tuple in commit:
-                commit_type, commit_msg, commit_hash = commit_tuple
-                summary = generate_summary_string(spring_boot_folder, commit_hash, 50)
-                new_commit = (commit_type, commit_msg, commit_hash, filename, summary)
-                commits.append(new_commit)
+    data_folder = 'data'
+    # 将所有需要测试的commit取出
+    # commit = [(commit_type, commit_msg, commit_hash, filename, summary)]
+    commits = []
+    for filename in os.listdir(data_folder):
+        file_path = os.path.join(data_folder, filename)
+        commit = read_commit(file_path)
+        for commit_tuple in commit:
+            commit_type, commit_msg, commit_hash = commit_tuple
+            summary = generate_summary_string(spring_boot_folder, commit_hash, 50)
+            new_commit = (commit_type, commit_msg, commit_hash, filename, summary)
+            commits.append(new_commit)
 
-        with ThreadPoolExecutor(max_workers=50) as executor:
-            futures = []
-            for commit in commits:
-                futures.append(
-                    executor.submit(process_commit, commit, timestamp))
+    with ThreadPoolExecutor(max_workers=50) as executor:
+        futures = []
+        for commit in commits:
+            futures.append(
+                executor.submit(process_commit, commit, timestamp))
 
-            for future in as_completed(futures):
-                future.result()
+        for future in as_completed(futures):
+            future.result()
 
-        end_time = time.time()
-        elapsed_time = end_time - start_time
-        print(f"Execution time: {elapsed_time:.2f} seconds")
+    end_time = time.time()
+    elapsed_time = end_time - start_time
+    print(f"Execution time: {elapsed_time:.2f} seconds")
