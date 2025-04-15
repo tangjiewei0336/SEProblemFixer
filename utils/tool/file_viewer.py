@@ -26,8 +26,6 @@ class ToolParser:
             self.tool_info = {
                 "filepath": action.find("filepath").text,
                 "filename": action.find("filename").text,
-                "start_line": int(action.find("start_line").text),
-                "end_line": int(action.find("end_line").text),
             }
 
             self._validate_input()
@@ -45,10 +43,6 @@ class ToolParser:
         ):
             raise ValueError("filepath和filename必须是字符串类型")
 
-        # 验证行号
-        if not (1 <= self.tool_info["start_line"] <= self.tool_info["end_line"]):
-            raise ValueError("无效的行号范围")
-
     def get_tool_info(self):
         """
         返回解析后的工具信息
@@ -56,29 +50,15 @@ class ToolParser:
         return self.tool_info
 
 
-def get_file_content(filepath, filename, start_line, end_line):
+def get_file_content(filepath, filename):
     """
     根据工具调用信息，返回指定文件的内容
     """
-    # 确保行号为1-based
-    start_line = max(1, start_line)
-    end_line = max(start_line, end_line)
-
     try:
         # 使用绝对路径读取文件
         file_path = f"{filepath}/{filename}"
         with open(file_path, "r", encoding="utf-8") as file:
-            lines = file.readlines()
-
-            # 检查行号范围
-            if start_line > len(lines):
-                raise ValueError("起始行号超出文件范围")
-            if end_line > len(lines):
-                end_line = len(lines)
-
-            # 提取指定行范围的内容
-            content = "".join(lines[start_line - 1 : end_line])
-            return content
+            return file.read()
 
     except FileNotFoundError:
         raise FileNotFoundError(f"文件 {file_path} 不存在")
