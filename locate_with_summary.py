@@ -6,7 +6,7 @@ from concurrent.futures import ThreadPoolExecutor, as_completed
 from config import project_root
 from glm import ChatGLM, ModelType
 from summarize import summarize_spring_boot_folder
-from utils.files import read_commit
+from utils.files import read_commit, read_and_replace_prompt
 from utils.git import checkout_to_parent_commit
 
 
@@ -17,14 +17,6 @@ def generate_summary_string(root_folder: str, commit_hash: str, max_workers=5) -
     for file, summary in summary_result.items():
         summary_return += f"\n文件：{file}\n摘要：{summary}\n"
     return summary_return
-
-
-def read_and_replace_prompt(file_path: str, variables: dict) -> str:
-    with open(file_path, 'r', encoding='utf-8') as file:
-        prompt = file.read()
-    for key, value in variables.items():
-        prompt = prompt.replace(f"{{{{{key}}}}}", value)
-    return prompt
 
 
 def process_commit(commit, timestamp):
@@ -59,34 +51,34 @@ def process_commit(commit, timestamp):
 
 
 if __name__ == "__main__":
-    spring_boot_folder = project_root
+    while True:
+        spring_boot_folder = project_root
 
-    start_time = time.time()
-    timestamp = datetime.datetime.now().strftime("%Y%m%d%H%M%S")
+        start_time = time.time()
+        timestamp = datetime.datetime.now().strftime("%Y%m%d%H%M%S")
 
-    data_folder = 'data'
-    # commit = [(commit_type, commit_msg, commit_hash, filename, summary)]
-    commits = []
-    for filename in os.listdir(data_folder):
-        file_path = os.path.join(data_folder, filename)
-        commit = read_commit(file_path)
-        for commit_tuple in commit:
-            commit_type, commit_msg, commit_hash = commit_tuple
-            summary = generate_summary_string(spring_boot_folder, commit_hash, 50)
-            new_commit = (commit_type, commit_msg, commit_hash, filename, summary)
-            commits.append(new_commit)
+        data_folder = 'data'
+        # 将所有需要测试的commit取出
+        # commit = [(commit_type, commit_msg, commit_hash, filename, summary)]
+        commits = []
+        for filename in os.listdir(data_folder):
+            file_path = os.path.join(data_folder, filename)
+            commit = read_commit(file_path)
+            for commit_tuple in commit:
+                commit_type, commit_msg, commit_hash = commit_tuple
+                summary = generate_summary_string(spring_boot_folder, commit_hash, 50)
+                new_commit = (commit_type, commit_msg, commit_hash, filename, summary)
+                commits.append(new_commit)
 
-    total_amount = len(commits)
+        with ThreadPoolExecutor(max_workers=50) as executor:
+            futures = []
+            for commit in commits:
+                futures.append(
+                    executor.submit(process_commit, commit, timestamp))
 
-    with ThreadPoolExecutor(max_workers=50) as executor:
-        futures = []
-        for commit in commits:
-            futures.append(
-                executor.submit(process_commit, commit, timestamp))
+            for future in as_completed(futures):
+                future.result()
 
-        for future in as_completed(futures):
-            future.result()
-
-    end_time = time.time()
-    elapsed_time = end_time - start_time
-    print(f"Execution time: {elapsed_time:.2f} seconds")
+        end_time = time.time()
+        elapsed_time = end_time - start_time
+        print(f"Execution time: {elapsed_time:.2f} seconds")

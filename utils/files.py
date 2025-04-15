@@ -1,6 +1,18 @@
 import os
 
 
+def read_and_replace_prompt(file_path: str, variables: dict) -> str:
+    """
+    从指定文件中读取文本，
+    并将其中的{{var}}替换成对应的文本。
+    """
+    with open(file_path, 'r', encoding='utf-8') as file:
+        prompt = file.read()
+    for key, value in variables.items():
+        prompt = prompt.replace(f"{{{{{key}}}}}", value)
+    return prompt
+
+
 def concat_code_files(root_path: str, filter: callable) -> str:
     """
     递归遍历路径下所有文件夹中的代码文件，
