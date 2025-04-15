@@ -52,6 +52,26 @@ class ChatGLM(BaseChatModel):
             raise ValueError(
                 "API key must be provided either as a parameter or through the GLM_API_KEY environment variable")
 
+    def chat(self, messages):
+        """
+        支持多轮对话的接口
+        :param messages: 消息列表，格式为[{"role": "user"|"assistant", "content": "内容"}]
+        :return: AIMessage对象
+        """
+        post_data = {
+            "model": self.model_type.model_code,
+            "messages": messages
+        }
+        
+        header = {"Content-Type": "application/json",
+                  "Authorization": f"Bearer {generate_token(self.api_key, 6000)}"}
+        res = post_req(self.post_url, post_data, header)
+        if res.status_code != 200:
+            raise Exception(f"Error: {res.status_code} {res.text}")
+        
+        json_res = res.json()
+        response = json_res['choices'][0]['message']['content']
+        return AIMessage(content=response)
 
     def _generate(
             self,
@@ -70,7 +90,7 @@ class ChatGLM(BaseChatModel):
                              "content": prompt
                          }
                      ]}
-        print(prompt)
+        # print(prompt)
 
         header = {"Content-Type": "application/json",
                   "Authorization": f"Bearer {generate_token(self.api_key, 6000)}"}
