@@ -35,6 +35,7 @@ def summarize_file(file_path, openai_client, openai_model):
 def summarize_spring_boot_folder(root_folder, openai_client, openai_model, max_workers=5):
     """
     递归遍历 root_folder 下所有 Java 文件，并发生成摘要。
+    返回按文件路径排序的三元组列表(文件路径，摘要，prompt)。
     """
     # 收集所有 .java 文件路径
     file_paths = []
@@ -43,7 +44,7 @@ def summarize_spring_boot_folder(root_folder, openai_client, openai_model, max_w
             if filename.endswith(".java"):
                 file_paths.append(os.path.join(dirpath, filename))
 
-    summaries = {}
+    results = []
 
     # 使用 ThreadPoolExecutor 并发处理文件
     with concurrent.futures.ThreadPoolExecutor(max_workers=max_workers) as executor:
@@ -52,11 +53,14 @@ def summarize_spring_boot_folder(root_folder, openai_client, openai_model, max_w
         }
 
         for future in concurrent.futures.as_completed(future_to_file):
-            file, summary, prompt = future.result()
+            file_path, summary, prompt = future.result()
             if summary:
-                summaries[file] = summary
+                results.append((file_path, summary, prompt))
 
-    return summaries
+    # 按文件路径排序
+    results.sort(key=lambda x: x[0])
+
+    return results
 
 
 if __name__ == "__main__":
@@ -69,5 +73,5 @@ if __name__ == "__main__":
 
     result = summarize_spring_boot_folder(spring_boot_folder, client, config.deepseek_model, max_workers=100)
 
-    for file, summary, prompt in result.items():
-        print(f"\nprompt: {prompt}\n文件：{file}\n摘要：{summary}\n")
+    for file_path, summary, prompt in result:
+        print(f"\nprompt: {prompt}\n文件：{file_path}\n摘要：{summary}\n")
