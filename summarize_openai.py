@@ -1,3 +1,4 @@
+import datetime
 import os
 import concurrent.futures
 
@@ -73,5 +74,17 @@ if __name__ == "__main__":
 
     result = summarize_spring_boot_folder(spring_boot_folder, client, config.deepseek_model, max_workers=100)
 
-    for file_path, summary, prompt in result:
-        print(f"\nprompt: {prompt}\n文件：{file_path}\n摘要：{summary}\n")
+    # 创建保存目录
+    log_dir = os.path.join("logs", "summary_deepseek")
+    os.makedirs(log_dir, exist_ok=True)
+
+    # 创建带时间戳的文件名
+    timestamp = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
+    log_file = os.path.join(log_dir, f"{timestamp}.txt")
+
+    # 写入文件
+    with open(log_file, 'w', encoding='utf-8') as f:
+        for file_path, summary, prompt in result:
+            f.write(f"\nprompt: {prompt}\n文件：{file_path}\n摘要：{summary}\n")
+
+    print(f"摘要结果已保存到 {log_file}")
