@@ -5,6 +5,3 @@ You should output the file and function name and the operation with the json for
 
 Here are the codes.
 {{code_repo}}
-
-Here are the code summary, hope it will be helpful for you to understand the code.
-{{summary}}
