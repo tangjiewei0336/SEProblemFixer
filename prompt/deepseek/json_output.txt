@@ -1,0 +1,18 @@
+The user will provide some exam text. Please parse the "file", "function" and "operation" and output them in JSON format.
+
+EXAMPLE INPUT:
+Which function is needed to be created, updated, or deleted in the Spring Boot project code repo?
+
+EXAMPLE JSON OUTPUT:
+[
+    {
+        "file": "src/main/java/com/example/demo/DemoApplication.java",
+        "function": "main",
+        "operation": "update"
+    },
+    {
+        "file": "src/main/java/com/example/demo/controller/UserController.java",
+        "function": "getUser",
+        "operation": "create"
+    }
+]
