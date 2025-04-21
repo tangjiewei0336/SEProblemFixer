@@ -24,12 +24,18 @@ def extract_functions(file_content):
 
 
 
-def generate_prompt(file_path, file_content):
+def generate_prompt(file_path, file_content, rel_path=False, project_root=None):
     """
     生成摘要提示词，包括文件整体概述及函数功能描述。
+    如果rel_path=True并且传入了project_root，则生成的prompt中包含的路径为相对路径。
     """
     functions = extract_functions(file_content)
-    prompt = f"请用中文概括文件：{file_path}\n\n"
+    if (not rel_path) or (project_root is None):
+        prompt = f"请用中文概括文件：{file_path}\n\n"
+    else:
+        # 计算相对路径
+        rel_path = os.path.relpath(file_path, project_root)
+        prompt = f"请用中文概括文件：{rel_path}\n\n"
     prompt += "【文件整体概括】：请总结该文件的主要功能和作用。\n\n"
     if functions:
         prompt += "【函数概括】：请分别概括下列函数的功能：\n" + "\n".join(f"- {func}" for func in functions) + "\n"
