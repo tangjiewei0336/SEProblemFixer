@@ -1,3 +1,7 @@
+"""
+使用openai接口实现的总结文件
+"""
+
 import datetime
 import os
 import concurrent.futures
@@ -8,7 +12,7 @@ import config
 from summarize import generate_prompt
 
 
-def summarize_file(file_path, openai_client, openai_model, rel_path=False, project_root=None, print_log = False):
+def summarize_file(file_path, openai_client, openai_model, rel_path=False, project_root=None, print_log=False):
     """
     读取文件内容，生成摘要。
     """
@@ -39,7 +43,8 @@ def summarize_file(file_path, openai_client, openai_model, rel_path=False, proje
     return file_path, summary, prompt
 
 
-def summarize_spring_boot_folder(root_folder, openai_client, openai_model, max_workers=5, rel_path=False, print_log=False):
+def summarize_spring_boot_folder(root_folder, openai_client, openai_model, max_workers=5, rel_path=False,
+                                 print_log=False):
     """
     递归遍历 root_folder 下所有 Java 文件，并发生成摘要。
     返回按文件路径排序的三元组列表(文件路径，摘要，prompt)。
@@ -56,7 +61,8 @@ def summarize_spring_boot_folder(root_folder, openai_client, openai_model, max_w
     # 使用 ThreadPoolExecutor 并发处理文件
     with concurrent.futures.ThreadPoolExecutor(max_workers=max_workers) as executor:
         future_to_file = {
-            executor.submit(summarize_file, file, openai_client, openai_model, rel_path, root_folder, print_log): file for file in file_paths
+            executor.submit(summarize_file, file, openai_client, openai_model, rel_path, root_folder, print_log): file
+            for file in file_paths
         }
 
         for future in concurrent.futures.as_completed(future_to_file):
@@ -78,7 +84,8 @@ if __name__ == "__main__":
         base_url=config.deepseek_base_url,
     )
 
-    result = summarize_spring_boot_folder(spring_boot_folder, client, config.deepseek_model, max_workers=1, rel_path=True, print_log=True)
+    result = summarize_spring_boot_folder(spring_boot_folder, client, config.deepseek_model, max_workers=1,
+                                          rel_path=True, print_log=True)
 
     # 创建保存目录
     log_dir = os.path.join("logs", "summary_deepseek")
