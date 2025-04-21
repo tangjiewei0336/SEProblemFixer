@@ -13,6 +13,7 @@ from summarize import generate_prompt
 async def summarize_file(file_path, ark_client, ark_bi_model, rel_path=False, project_root=None, print_log=False):
     """
     读取文件内容，生成摘要。
+    rel_path为True时，返回的也是相对路径而非绝对路径。
     """
     try:
         with open(file_path, 'r', encoding='utf-8') as f:
@@ -22,6 +23,10 @@ async def summarize_file(file_path, ark_client, ark_bi_model, rel_path=False, pr
         return file_path, None, None
 
     prompt = generate_prompt(file_path, content, rel_path, project_root)
+
+    file_path_rel = file_path
+    if rel_path:
+        file_path_rel = os.path.relpath(file_path, project_root)
 
     if print_log:
         print(f"prompt: \n{prompt}\n")
@@ -39,10 +44,17 @@ async def summarize_file(file_path, ark_client, ark_bi_model, rel_path=False, pr
         if print_log:
             print(f"summary：\n{summary}\n")
 
-        return file_path, summary, prompt
+        if rel_path:
+            return file_path_rel, summary, prompt
+        else:
+            return file_path, summary, prompt
     except Exception as e:
         print(f"生成摘要失败：{e}")
-        return file_path, None, prompt
+
+        if rel_path:
+            return file_path_rel, None, prompt
+        else:
+            return file_path, None, prompt
 
 
 async def summarize_spring_boot_folder(root_folder, ark_client, ark_bi_model, rel_path=False, print_log=False):
@@ -62,6 +74,23 @@ async def summarize_spring_boot_folder(root_folder, ark_client, ark_bi_model, re
     results = await asyncio.gather(*tasks)
 
     return results
+
+
+async def generate_summaries(root_folder, ark_client, ark_bi_model):
+    summaries_data = await summarize_spring_boot_folder(
+        root_folder,
+        ark_client,
+        ark_bi_model,
+        rel_path=True
+    )
+
+    # 格式化摘要
+    formatted_summaries = ""
+    for file_path, summary, _ in summaries_data:
+        if summary:
+            formatted_summaries += f"文件: {file_path}\n摘要:\n{summary}\n"
+
+    return formatted_summaries
 
 
 if __name__ == "__main__":
