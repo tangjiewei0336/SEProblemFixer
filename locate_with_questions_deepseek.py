@@ -65,6 +65,11 @@ if __name__ == "__main__":
         summary_time = summary_time_end - summary_time_start
         print(f"摘要生成完成，耗时: {summary_time:.2f}秒")
 
+    print("=== System Prompt ===\n", end="")
+    print(system_prompt, end="")
+    print("\n\n=== User Prompt ===\n", end="")
+    print(user_prompt, end="")
+
     client = OpenAI(
         api_key=config.deepseek_api_key,
         base_url=config.deepseek_base_url,
@@ -84,21 +89,29 @@ if __name__ == "__main__":
 
     reasoning_content = ""
     content = ""
+
+    reasoning_content_log = False
+    content_log = False
+
     for chunk in completion:
         if hasattr(chunk.choices[0].delta, 'reasoning_content') and chunk.choices[0].delta.reasoning_content:
+            if not reasoning_content_log:
+                reasoning_content_log = True
+                print("\n\n=== Reasoning Content ===\n", end="")
             reasoning_content += chunk.choices[0].delta.reasoning_content
             print(chunk.choices[0].delta.reasoning_content, end="")
         else:
+            if not content_log:
+                content_log = True
+                print("\n\n=== Content ===\n", end="")
             content += chunk.choices[0].delta.content
             print(chunk.choices[0].delta.content, end="")
 
-    # 创建保存结果的目录
-    result_dir = f"result/locate_with_questions_deepseek/{selected_commit_type}/{selected_commit_hash}"
-    os.makedirs(result_dir, exist_ok=True)
-    result_file = f"{result_dir}/{start_time}.txt"
-
-    # 将prompt写入文件
-    with open(result_file, "w", encoding="utf-8") as f:
+    # 日志
+    logs_dir = f"logs/locate_with_questions_deepseek/{selected_commit_type}/{selected_commit_hash}"
+    os.makedirs(logs_dir, exist_ok=True)
+    logs_file = f"{logs_dir}/{start_time}.txt"
+    with open(logs_file, "w", encoding="utf-8") as f:
         f.write("=== System Prompt ===\n")
         f.write(system_prompt)
         f.write("\n\n=== User Prompt ===\n")
@@ -107,6 +120,15 @@ if __name__ == "__main__":
         f.write(reasoning_content)
         f.write("\n\n=== Content ===\n")
         f.write(content)
+        print("日志保存成功!")
+
+    # 结果
+    result_dir = f"result/locate_with_questions_deepseek/{selected_commit_type}/{selected_commit_hash}"
+    os.makedirs(result_dir, exist_ok=True)
+    result_file = f"{result_dir}/{start_time}.txt"
+    with open(result_file, "w", encoding="utf-8") as f:
+        f.write(content)
+        print("结果保存成功!")
 
     end_time = time.time()
     total_time = end_time - start_time
