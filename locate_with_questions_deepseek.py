@@ -8,44 +8,9 @@ from volcenginesdkarkruntime import AsyncArk
 import config
 import summarize_ark_bi
 from config import project_root
-from utils.files import read_commit, concat_code_files, read_and_replace_prompt
+from locate_with_questions import display_commit_list
+from utils.files import concat_code_files, read_and_replace_prompt
 from utils.git import checkout_to_parent_commit
-
-
-def display_commit_list():
-    """
-    展示所有commit并让用户选择一个
-    """
-    # 将所有需要测试的commit取出
-    # commit = [(commit_type, commit_msg, commit_hash, filename)]
-    commits = []
-    for filename in os.listdir(data_folder):
-        file_path = os.path.join(data_folder, filename)
-        commit = read_commit(file_path)
-        for commit_tuple in commit:
-            commit_type, commit_msg, commit_hash = commit_tuple
-            new_commit = (commit_type, commit_msg, commit_hash, filename)
-            commits.append(new_commit)
-
-    print("\n可用的commit列表:")
-    print("-" * 80)
-    for i, commit in enumerate(commits):
-        commit_type, commit_msg, commit_hash, filename = commit
-        print(
-            f"[{i + 1}] Hash: {commit_hash[:8]} | 类型: {commit_type} | 文件: {filename}"
-        )
-        print(f"    消息: {commit_msg}")
-        print("-" * 80)
-
-    while True:
-        try:
-            choice = int(input("\n请选择一个commit (输入对应的序号): "))
-            if 1 <= choice <= len(commits):
-                return commits[choice - 1]
-            else:
-                print(f"错误: 请输入1到{len(commits)}之间的数字")
-        except ValueError:
-            print("错误: 请输入有效的数字")
 
 
 if __name__ == "__main__":
@@ -116,8 +81,6 @@ if __name__ == "__main__":
             'type': 'json_object'
         }
     )
-
-    print(completion.choices[0].message.content)
 
     end_time = time.time()
     total_time = end_time - start_time
