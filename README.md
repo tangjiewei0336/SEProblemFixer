@@ -23,3 +23,10 @@ deepseek_base_url = "https://ark.cn-beijing.volces.com/api/v3"
 deepseek_model = "" # your 在线推理 model Endpoint ID 
 deepseek_bi_model = "" # your 批量推理 model Endpoint ID
 ```
+
+### 运行说明
+
+1. 在`prompt/deepseek/locate_with_questions.txt`中，可以自己定义提示词，提示词支持的变量有以下几种：
+   - commit_hash, commit_message, commit_type
+   - code_repo, summary
+   通过定义这些提示词，你可以自定义输入的是代码仓库还是代码总结。
