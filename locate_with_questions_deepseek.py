@@ -79,8 +79,19 @@ if __name__ == "__main__":
         ],
         response_format={
             'type': 'json_object'
-        }
+        },
+        stream=True,
     )
+
+    reasoning_content = ""
+    content = ""
+    for chunk in completion:
+        if hasattr(chunk.choices[0].delta, 'reasoning_content') and chunk.choices[0].delta.reasoning_content:
+            reasoning_content += chunk.choices[0].delta.reasoning_content
+            print(chunk.choices[0].delta.reasoning_content, end="")
+        else:
+            content += chunk.choices[0].delta.content
+            print(chunk.choices[0].delta.content, end="")
 
     end_time = time.time()
     total_time = end_time - start_time
