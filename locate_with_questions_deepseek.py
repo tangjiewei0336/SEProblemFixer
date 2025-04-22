@@ -12,7 +12,6 @@ from locate_with_questions import display_commit_list
 from utils.files import concat_code_files, read_and_replace_prompt
 from utils.git import checkout_to_parent_commit
 
-
 if __name__ == "__main__":
     start_time = time.time()
 
@@ -93,20 +92,22 @@ if __name__ == "__main__":
             content += chunk.choices[0].delta.content
             print(chunk.choices[0].delta.content, end="")
 
-    end_time = time.time()
-    total_time = end_time - start_time
-    print(f"总耗时: {total_time:.2f}秒")
-
     # 创建保存结果的目录
     result_dir = f"result/locate_with_questions_deepseek/{selected_commit_type}/{selected_commit_hash}"
     os.makedirs(result_dir, exist_ok=True)
-    result_file = f"{result_dir}/{end_time}.txt"
+    result_file = f"{result_dir}/{start_time}.txt"
 
-    # 将prompt和结果写入文件
+    # 将prompt写入文件
     with open(result_file, "w", encoding="utf-8") as f:
         f.write("=== System Prompt ===\n")
         f.write(system_prompt)
         f.write("\n\n=== User Prompt ===\n")
         f.write(user_prompt)
-        f.write("\n\n=== Completion Result ===\n")
-        f.write(completion.choices[0].message.content)
+        f.write("\n\n=== Reasoning Content ===\n")
+        f.write(reasoning_content)
+        f.write("\n\n=== Content ===\n")
+        f.write(content)
+
+    end_time = time.time()
+    total_time = end_time - start_time
+    print(f"总耗时: {total_time:.2f}秒")
