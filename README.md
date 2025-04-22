@@ -13,7 +13,9 @@ pip install --upgrade "volcengine-python-sdk[ark]"
 
 2. 在`config.py`中配置`API_KEY`和`base_url`。
 
-DeepSeeK官方的R1的API不支持JSON Output和Function Call，但火山引擎中的DeepSeeK-R1支持，因此，这里以火山引擎配置为例。
+DeepSeeK官方的R1的API不支持JSON Output和Function Call，但火山引擎中的DeepSeeK-R1支持。
+
+同时，获取摘要的函数使用了火山引擎批量推理功能降低成本，因此运行代码必须配置火山引擎。
 
 ```python
 import os
@@ -30,3 +32,14 @@ deepseek_bi_model = "" # your 批量推理 model Endpoint ID
    - commit_hash, commit_message, commit_type
    - code_repo, summary
    通过定义这些提示词，你可以自定义输入的是代码仓库还是代码总结。
+
+### 实验笔记
+
+1. 最终实验代码还是没有使用Function Calling功能，因为火山引擎的文档中对Function Calling功能做了以下陈述。
+   > Function Calling并不会增强模型能力， 并且FC模型综合能力不如pro
+   > 
+   > 不推荐使用其试图完成模型正常情况下做不到的事
+   > 
+   > 写代码、写sql、（无插件）解题等
+   > 
+   > 参考资料: [Function Calling 使用说明](https://www.volcengine.com/docs/82379/1262342#function-calling%E9%80%82%E7%94%A8%E5%9C%BA%E6%99%AF)
