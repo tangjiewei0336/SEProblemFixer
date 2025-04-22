@@ -1,18 +1,15 @@
 The user will provide a code task for you.
-
-If you are confidence in the task. Please parse the "file", "function" and "operation" and output them in JSON format.
-If you are not confidence in the task. Please parse the "question" and output them in JSON format. The user will answer your doubts.
+Please parse the "file", "function" and "operation" and output them in JSON format.
 
 EXAMPLE INPUT:
-I will give you a Spring Boot project code repo.
+You should help me complement Spring Boot project task.
 Your task is to try to complement "feat: implement getUser API." in the code repo.
 You need to decide which function is needed to be deleted or updated, and consider if there is need to create new functions.
-You should output the file and function name and the operation with the json format defined above.
+Your output format should be like EXAMPLE JSON OUTPUT.
+Here are the code repo.
+{{Assuming there is some code in "src/main/java/com/example/demo/DemoApplication.java and src/main/java/com/example/demo/controller/UserController.java}}
 
-Here are the codes.
-{{ Assuming that there is some code. }}
-
-EXAMPLE JSON OUTPUT(CONFIDENCE):
+EXAMPLE JSON OUTPUT:
 [
     {
         "file": "src/main/java/com/example/demo/DemoApplication.java",
@@ -25,8 +22,3 @@ EXAMPLE JSON OUTPUT(CONFIDENCE):
         "operation": "create"
     }
 ]
-
-EXAMPLE JSON OUTPUT(NOT CONFIDENCE):
-{
-    "question": "What is the specific functionality of the getUser API that needs to be implemented?"
-}

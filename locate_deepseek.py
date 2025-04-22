@@ -1,4 +1,5 @@
 import asyncio
+import datetime
 import os
 import time
 
@@ -12,8 +13,10 @@ from locate_with_questions import display_commit_list
 from utils.files import concat_code_files, read_and_replace_prompt
 from utils.git import checkout_to_parent_commit
 
+
 if __name__ == "__main__":
     start_time = time.time()
+    timestamp = datetime.datetime.now().strftime("%Y%m%d%H%M%S")
 
     spring_boot_folder = project_root
     data_folder = "data"
@@ -44,7 +47,7 @@ if __name__ == "__main__":
     )
 
     user_prompt = read_and_replace_prompt(
-        "prompt/deepseek/locate_with_questions.txt",
+        "prompt/deepseek/locate.txt",
         {
             "commit_hash": selected_commit_hash,
             "commit_msg": selected_commit_msg,
@@ -58,7 +61,8 @@ if __name__ == "__main__":
         summary_time_start = time.time()
 
         ark_client = AsyncArk()
-        summaries = asyncio.run(summarize_ark_bi.generate_summaries(spring_boot_folder, ark_client, config.deepseek_bi_model))
+        summaries = asyncio.run(
+            summarize_ark_bi.generate_summaries(spring_boot_folder, ark_client, config.deepseek_bi_model))
         user_prompt = user_prompt.replace("{{summary}}", summaries)
 
         summary_time_end = time.time()
@@ -75,12 +79,14 @@ if __name__ == "__main__":
         base_url=config.deepseek_base_url,
     )
 
+    messages = [
+        {"role": "system", "content": system_prompt},
+        {"role": "user", "content": user_prompt}
+    ]
+
     completion = client.chat.completions.create(
-        model=config.deepseek_model,  # your model endpoint ID
-        messages=[
-            {"role": "system", "content": system_prompt},
-            {"role": "user", "content": user_prompt},
-        ],
+        model=config.deepseek_model,
+        messages=messages,
         response_format={
             'type': 'json_object'
         },
@@ -107,10 +113,17 @@ if __name__ == "__main__":
             content += chunk.choices[0].delta.content
             print(chunk.choices[0].delta.content, end="")
 
+    # 结果
+    result_dir = f"result/locate_deepseek/{selected_commit_filename}/{selected_commit_hash}"
+    os.makedirs(result_dir, exist_ok=True)
+    result_file = f"{result_dir}/{timestamp}.json"
+    with open(result_file, "w", encoding="utf-8") as f:
+        f.write(content)  # 保存最终回答
+
     # 日志
-    logs_dir = f"logs/locate_with_questions_deepseek/{selected_commit_type}/{selected_commit_hash}"
+    logs_dir = f"logs/locate_deepseek/{selected_commit_filename}/{selected_commit_hash}"
     os.makedirs(logs_dir, exist_ok=True)
-    logs_file = f"{logs_dir}/{start_time}.txt"
+    logs_file = f"{logs_dir}/{timestamp}.txt"
     with open(logs_file, "w", encoding="utf-8") as f:
         f.write("=== System Prompt ===\n")
         f.write(system_prompt)
@@ -120,15 +133,6 @@ if __name__ == "__main__":
         f.write(reasoning_content)
         f.write("\n\n=== Content ===\n")
         f.write(content)
-        print("日志保存成功!")
-
-    # 结果
-    result_dir = f"result/locate_with_questions_deepseek/{selected_commit_type}/{selected_commit_hash}"
-    os.makedirs(result_dir, exist_ok=True)
-    result_file = f"{result_dir}/{start_time}.txt"
-    with open(result_file, "w", encoding="utf-8") as f:
-        f.write(content)
-        print("结果保存成功!")
 
     end_time = time.time()
     total_time = end_time - start_time

@@ -31,7 +31,12 @@ deepseek_bi_model = "" # your 批量推理 model Endpoint ID
 1. 在`prompt/deepseek/locate_with_questions.txt`中，可以自己定义提示词，提示词支持的变量有以下几种：
    - commit_hash, commit_message, commit_type
    - code_repo, summary
+   
    通过定义这些提示词，你可以自定义输入的是代码仓库还是代码总结。
+
+2. locate_deepseek.py支持summary, 修改`prompt/deepseek/locate_with_questions.txt`即可。
+
+3. locate_ark_bi.py是调用火山引擎批量推理进行多线程批量处理所有的测试用例，暂不支持summary。
 
 ### 实验笔记
 
@@ -43,3 +48,5 @@ deepseek_bi_model = "" # your 批量推理 model Endpoint ID
    > 写代码、写sql、（无插件）解题等
    > 
    > 参考资料: [Function Calling 使用说明](https://www.volcengine.com/docs/82379/1262342#function-calling%E9%80%82%E7%94%A8%E5%9C%BA%E6%99%AF)
+
+2. 使用DeepSeeK-R1进行多轮对话效果不好，无论如何修改System Prompt和User Prompt，模型从不询问问题。
