@@ -11,10 +11,22 @@ from utils.git import checkout_to_parent_commit
 from utils.tool.file_viewer import ToolParser, get_file_content
 
 
-def display_commit_list(commits):
+def display_commit_list(commits=None, data_folder="./data"):
     """
     展示所有commit并让用户选择一个
     """
+    if commits is None:
+        # 将所有需要测试的commit取出
+        # commit = [(commit_type, commit_msg, commit_hash, filename)]
+        commits = []
+        for filename in os.listdir(data_folder):
+            file_path = os.path.join(data_folder, filename)
+            commit = read_commit(file_path)
+            for commit_tuple in commit:
+                commit_type, commit_msg, commit_hash = commit_tuple
+                new_commit = (commit_type, commit_msg, commit_hash, filename)
+                commits.append(new_commit)
+
     print("\n可用的commit列表:")
     print("-" * 80)
     for i, commit in enumerate(commits):
@@ -126,19 +138,9 @@ if __name__ == "__main__":
     timestamp = datetime.datetime.now().strftime("%Y%m%d%H%M%S")
 
     data_folder = "data"
-    # 将所有需要测试的commit取出
-    # commit = [(commit_type, commit_msg, commit_hash, filename)]
-    commits = []
-    for filename in os.listdir(data_folder):
-        file_path = os.path.join(data_folder, filename)
-        commit = read_commit(file_path)
-        for commit_tuple in commit:
-            commit_type, commit_msg, commit_hash = commit_tuple
-            new_commit = (commit_type, commit_msg, commit_hash, filename)
-            commits.append(new_commit)
 
     # 显示所有commit并让用户选择一个
-    selected_commit = display_commit_list(commits)
+    selected_commit = display_commit_list()
     selected_commit_type = selected_commit[0]
     selected_commit_msg = selected_commit[1]
     selected_commit_hash = selected_commit[2]
