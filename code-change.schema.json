@@ -1,0 +1,87 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Java Code Changes",
+  "description": "A structured way to define changes between two Java code versions",
+  "type": "object",
+  "properties": {
+    "repository": {
+      "type": "string",
+      "description": "Repository name or path"
+    },
+    "base_commit": {
+      "type": "string",
+      "description": "Original commit hash"
+    },
+    "target_commit": {
+      "type": "string",
+      "description": "Target commit hash"
+    },
+    "operations": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "file": {
+            "type": "string",
+            "description": "File path (e.g., src/main/java/com/example/MyClass.java)"
+          },
+          "action": {
+            "type": "string",
+            "enum": [
+              "CREATE_FILE",
+              "DELETE_FILE",
+              "RENAME_FILE",
+              "UPDATE_CODE"
+            ]
+          },
+          "content": {
+            "type": "string",
+            "description": "Required for CREATE_FILE (full content)"
+          },
+          "new_path": {
+            "type": "string",
+            "description": "Required for RENAME_FILE"
+          },
+          "changes": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "type": {
+                  "type": "string",
+                  "enum": [
+                    "ADD_CLASS",
+                    "REMOVE_CLASS",
+                    "ADD_FIELD",
+                    "REMOVE_FIELD",
+                    "UPDATE_FIELD",
+                    "ADD_METHOD",
+                    "REMOVE_METHOD",
+                    "UPDATE_METHOD",
+                    "ADD_IMPORT",
+                    "REMOVE_IMPORT"
+                  ]
+                },
+                "target": {
+                  "type": "string",
+                  "description": "Class/Method Signature/Field name(e.g., 'MyClass' or 'getName()')"
+                },
+                "new_code": {
+                  "type": "string",
+                  "description": "New implementation (for updates/additions)"
+                },
+                "insert_after": {
+                  "type": "string",
+                  "description": "Anchor point (e.g., 'class name')"
+                }
+              },
+              "required": ["type"]
+            }
+          }
+        },
+        "required": ["file", "action"]
+      }
+    }
+  },
+  "required": ["operations"]
+}
