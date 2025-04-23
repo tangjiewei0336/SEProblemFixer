@@ -6,15 +6,11 @@
   "properties": {
     "repository": {
       "type": "string",
-      "description": "Repository name or path"
+      "description": "Repository name or path, optional, only for human reference"
     },
     "base_commit": {
       "type": "string",
-      "description": "Original commit hash"
-    },
-    "target_commit": {
-      "type": "string",
-      "description": "Target commit hash"
+      "description": "Original commit hash, optional, only for human reference"
     },
     "operations": {
       "type": "array",
@@ -37,7 +33,7 @@
           },
           "content": {
             "type": "string",
-            "description": "Required for CREATE_FILE (full content)"
+            "description": "Required for CREATE_FILE (provide full content)"
           },
           "new_path": {
             "type": "string",
@@ -76,17 +72,17 @@
                   "type": "array",
                   "items": {
                     "type": "string",
-                    "description": "Method parameters (e.g., 'int id')"
+                    "description": "Method parameter type (e.g., 'int')"
                   },
-                    "description": "Parameters for methods (e.g., ['int id'])"
+                  "description": "Parameter signature (e.g., ['int']). Required for UPDATE_METHOD, REMOVE_METHOD"
                 },
                 "new_code": {
                   "type": "string",
-                  "description": "New implementation (for updates/additions)"
+                  "description": "New implementation (for updates/additions). Required for UPDATE_FIELD, UPDATE_METHOD, ADD_METHOD"
                 },
                 "import": {
                   "type": "string",
-                  "description": "Import statement (e.g., 'import java.util.List')"
+                  "description": "Import statement (e.g., 'import java.util.List'). Required for ADD_IMPORT, REMOVE_IMPORT"
                 }
               },
               "required": ["type"]
