@@ -1,7 +1,6 @@
 {
   "repository": "my-java-project",
   "base_commit": "a1b2c3d",
-  "target_commit": "b2c3d4e",
   "operations": [
     {
       "file": "UserService.java",

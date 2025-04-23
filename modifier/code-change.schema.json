@@ -32,7 +32,8 @@
               "DELETE_FILE",
               "RENAME_FILE",
               "UPDATE_CODE"
-            ]
+            ],
+            "description": "Action to perform on the file (e.g., 'CREATE_FILE')"
           },
           "content": {
             "type": "string",
@@ -60,7 +61,8 @@
                     "UPDATE_METHOD",
                     "ADD_IMPORT",
                     "REMOVE_IMPORT"
-                  ]
+                  ],
+                    "description": "Type of change (e.g., 'ADD_FIELD')"
                 },
                 "class": {
                   "type": "string",
@@ -81,6 +83,10 @@
                 "new_code": {
                   "type": "string",
                   "description": "New implementation (for updates/additions)"
+                },
+                "import": {
+                  "type": "string",
+                  "description": "Import statement (e.g., 'import java.util.List')"
                 }
               },
               "required": ["type"]
