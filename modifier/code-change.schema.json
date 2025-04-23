@@ -62,17 +62,25 @@
                     "REMOVE_IMPORT"
                   ]
                 },
-                "target": {
+                "class": {
                   "type": "string",
-                  "description": "Class/Method Signature/Field name(e.g., 'MyClass' or 'getName()')"
+                  "description": "Class name(e.g., 'MyClass')"
+                },
+                "method": {
+                  "type": "string",
+                    "description": "Method name (e.g., 'myMethod')"
+                },
+                "params": {
+                  "type": "array",
+                  "items": {
+                    "type": "string",
+                    "description": "Method parameters (e.g., 'int id')"
+                  },
+                    "description": "Parameters for methods (e.g., ['int id'])"
                 },
                 "new_code": {
                   "type": "string",
                   "description": "New implementation (for updates/additions)"
-                },
-                "insert_after": {
-                  "type": "string",
-                  "description": "Anchor point (e.g., 'class name')"
                 }
               },
               "required": ["type"]

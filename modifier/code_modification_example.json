@@ -1,0 +1,31 @@
+{
+  "repository": "my-java-project",
+  "base_commit": "a1b2c3d",
+  "target_commit": "b2c3d4e",
+  "operations": [
+    {
+      "file": "UserService.java",
+      "action": "UPDATE_CODE",
+      "changes": [
+        {
+          "type": "UPDATE_FIELD",
+          "class": "UserService",
+          "field": "userDao",
+          "new_code": "private final UserRepository userRepository;"
+        },
+        {
+          "type": "UPDATE_METHOD",
+          "class": "UserService",
+          "method": "getUserById",
+          "params": ["int"],
+          "new_code": "public String getUserById(int id) {\n    return userRepository.findById(id).orElse(\"Unknown\");\n}"
+        },
+        {
+          "type": "ADD_METHOD",
+          "class": "UserService",
+          "new_code": "public void deleteUser(int id) {\n    userRepository.deleteById(id);\n}"
+        }
+      ]
+    }
+  ]
+}
