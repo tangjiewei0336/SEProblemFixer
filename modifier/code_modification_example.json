@@ -18,14 +18,23 @@
           "class": "UserService",
           "method": "getUserById",
           "params": ["int"],
-          "new_code": "public String getUserById(int id) {\n    return userRepository.findById(id).orElse(\"Unknown\");\n}"
+          "new_code": "public String getUserById(int id) {\n        return userRepository.findById(id).orElse(\"Unknown\");\n    }"
         },
         {
           "type": "ADD_METHOD",
           "class": "UserService",
-          "new_code": "public void deleteUser(int id) {\n    userRepository.deleteById(id);\n}"
+          "new_code": "public void deleteUser(int id) {\n        userRepository.deleteById(id);\n    }"
+        },
+        {
+          "type": "ADD_IMPORT",
+          "import": "com.example.repository.UserRepository"
         }
       ]
+    },
+    {
+      "file": "src/main/java/com/example/NewService.java",
+      "action": "CREATE_FILE",
+      "content": "package com.example;\n\npublic class NewService {\n    public String greet() {\n        return \"Hello, World!\";\n    }\n}"
     }
   ]
 }
