@@ -32,6 +32,7 @@ def get_code_change_result(sb_project_root, commit_hash, commit_type, commit_mes
             "code_modification_example": get_file_content("modifier", "code_modification_example.json"),
             "locate_result": locate_result,
             "repo_name": "autodrive",
+            "code_change_schema": get_file_content("modifier", "code-change.schema.json"),
         },
     )
 
