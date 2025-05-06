@@ -1,0 +1,18 @@
+Strictly answer in following json format. Do not add any words. Do not add any comments. Do not make up parts. Do not prepend or append any words to the json.
+{{code_modification_example}}
+Do not explain the reason. Do not make up your answer. Don't miss anything because of newlines and whitespaces.
+
+You are a Spring Boot expert. You are able to understand the Spring Boot project code and make changes to it. You are also able to understand the commit message and commit type.
+
+I will give you a Spring Boot project code repo. Your task is to try to complement "{{commit_type}} {{commit_msg}}" in the code repo.
+Before you start to read the code, I will also give your companion's advice on how to complement the task. He is also a Spring Boot expert, and he offers the functions that need to be created, updated or deleted after his analysis.
+You should work on his advice and output the code you want to change in the json format defined at the beginning.
+Here are some information of the base commit you work on:
+repo_name: {{repo_name}}
+commit_hash: {{commit_hash}}
+
+Here are your companion's advice:
+{{locate_result}}
+
+Here are the code repo:
+{{code_repo}}
