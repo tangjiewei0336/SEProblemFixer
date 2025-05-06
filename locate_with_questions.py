@@ -101,37 +101,45 @@ def interactive_code_analysis(model, initial_prompt):
                     except json.JSONDecodeError:
                         pass
 
-        # 如果不是JSON结果，则是模型在提问
+        # 如果不是JSON结果，则是模型在提问或使用工具
         print("\n模型的问题:")
         print(model_reply)
 
         # 如果模型的回复中包含xml格式的工具调用信息
-        content = ""
         if "<tool>" in model_reply and "</tool>" in model_reply:
             print("\n检测到工具调用信息，正在解析...")
 
             # 提取工具调用信息
-            tool_info_str = "<tool>" + model_reply.split("<tool>")[1].split("</tool>")[0] + "</tool>"
+            tool_info_str = (
+                "<tool>"
+                + model_reply.split("<tool>")[1].split("</tool>")[0]
+                + "</tool>"
+            )
             parser = ToolParser(tool_info_str)
             parser.parse()
             tool_info = parser.get_tool_info()
             try:
-                content = get_file_content(
-                    project_root + tool_info["filepath"],
-                    tool_info["filename"],
-                )
+                content = get_file_content(os.path.join(project_root, tool_info["filepath"]))
             except Exception as e:
                 print(f"获取文件内容时发生错误: {e}")
 
             print("工具调用信息解析完成!")
             print(content)
+            messages.append({"role": "user", "content": content})
+        else:
+            user_reply = input("\n请回答模型的问题: ")
+            messages.append({"role": "user", "content": user_reply})
 
-        # 获取用户回答
-        user_reply = input("\n请回答模型的问题: ")
-        messages.append({"role": "user", "content": content + user_reply})
 
-
-def locate_with_questions(sb_project_root, commit_hash, commit_msg, commit_type, data_type, model_type, now_timestamp):
+def locate_with_questions(
+    sb_project_root,
+    commit_hash,
+    commit_msg,
+    commit_type,
+    data_type,
+    model_type,
+    now_timestamp,
+):
     """
     返回result, conversation_history
     """
@@ -145,15 +153,21 @@ def locate_with_questions(sb_project_root, commit_hash, commit_msg, commit_type,
         sb_project_root, filter=lambda x: x.endswith(".java"), use_relative_path=True
     )
 
-    prompt = read_and_replace_prompt(
-        "prompt/locate_with_questions.txt",
-        {
-            "commit_hash": commit_hash,
-            "commit_msg": commit_msg,
-            "commit_type": commit_type,
-            "code_repo": code_repo,
-        },
-    ) + "\n\n" + get_file_content("prompt/tools", "general.md") + "\n\n" + get_file_content("prompt/tools", "file_viewer.md")
+    prompt = (
+        read_and_replace_prompt(
+            "prompt/locate_with_questions.txt",
+            {
+                "commit_hash": commit_hash,
+                "commit_msg": commit_msg,
+                "commit_type": commit_type,
+                "code_repo": code_repo,
+            },
+        )
+        + "\n\n"
+        + get_file_content("prompt/tools/general.md")
+        + "\n\n"
+        + get_file_content("prompt/tools/file_viewer.md")
+    )
 
     model = ChatGLM(model_type=model_type)
 
@@ -165,18 +179,14 @@ def locate_with_questions(sb_project_root, commit_hash, commit_msg, commit_type,
     print(json.dumps(result, indent=2, ensure_ascii=False))
 
     # 保存结果
-    result_dir = os.path.join(
-        f"result/locate_with_questions/{data_type}", commit_hash
-    )
+    result_dir = os.path.join(f"result/locate_with_questions/{data_type}", commit_hash)
     os.makedirs(result_dir, exist_ok=True)
     result_file_path = os.path.join(result_dir, f"{now_timestamp}.txt")
     with open(result_file_path, "w", encoding="utf-8") as result_file:
         result_file.write(json.dumps(result, indent=2, ensure_ascii=False))
 
     # 保存日志（包含完整的对话历史）
-    logs_dir = os.path.join(
-        f"logs/locate_with_questions/{data_type}", commit_hash
-    )
+    logs_dir = os.path.join(f"logs/locate_with_questions/{data_type}", commit_hash)
     os.makedirs(logs_dir, exist_ok=True)
     logs_file_path = os.path.join(logs_dir, f"{now_timestamp}.txt")
     with open(logs_file_path, "w", encoding="utf-8") as logs_file:
@@ -216,6 +226,12 @@ if __name__ == "__main__":
 
     selected_commit_data_type = os.path.splitext(selected_commit_filename)[0]
 
-    locate_with_questions(spring_boot_folder,
-                          selected_commit_hash, selected_commit_msg, selected_commit_type, selected_commit_data_type,
-                          ModelType.GLM_4, timestamp)
+    locate_with_questions(
+        spring_boot_folder,
+        selected_commit_hash,
+        selected_commit_msg,
+        selected_commit_type,
+        selected_commit_data_type,
+        ModelType.GLM_4,
+        timestamp,
+    )

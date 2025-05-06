@@ -1,4 +1,5 @@
 import xml.etree.ElementTree as ET
+import os
 
 
 class ParserError(Exception):
@@ -25,7 +26,6 @@ class ToolParser:
 
             self.tool_info = {
                 "filepath": action.find("filepath").text,
-                "filename": action.find("filename").text,
             }
 
             self._validate_input()
@@ -38,9 +38,7 @@ class ToolParser:
         验证提取的工具调用信息
         """
         # 验证路径和文件名
-        if not isinstance(self.tool_info["filepath"], str) or not isinstance(
-            self.tool_info["filename"], str
-        ):
+        if not isinstance(self.tool_info["filepath"], str):
             raise ValueError("filepath和filename必须是字符串类型")
 
     def get_tool_info(self):
@@ -50,13 +48,12 @@ class ToolParser:
         return self.tool_info
 
 
-def get_file_content(filepath, filename):
+def get_file_content(file_path):
     """
     根据工具调用信息，返回指定文件的内容
     """
     try:
         # 使用绝对路径读取文件
-        file_path = f"{filepath}/{filename}"
         with open(file_path, "r", encoding="utf-8") as file:
             return file.read()
 
