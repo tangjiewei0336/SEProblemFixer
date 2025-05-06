@@ -131,6 +131,72 @@ def interactive_code_analysis(model, initial_prompt):
         messages.append({"role": "user", "content": content + user_reply})
 
 
+def locate_with_questions(sb_project_root, commit_hash, commit_msg, commit_type, data_type, model_type, now_timestamp):
+    """
+    返回result, conversation_history
+    """
+    checkout_result = checkout_to_parent_commit(sb_project_root, commit_hash)
+    if not checkout_result[0]:
+        print("git checkout 失败")
+        print(checkout_result)
+        exit()
+
+    code_repo = concat_code_files(
+        sb_project_root, filter=lambda x: x.endswith(".java"), use_relative_path=True
+    )
+
+    prompt = read_and_replace_prompt(
+        "prompt/locate_with_questions.txt",
+        {
+            "commit_hash": commit_hash,
+            "commit_msg": commit_msg,
+            "commit_type": commit_type,
+            "code_repo": code_repo,
+        },
+    ) + "\n\n" + get_file_content("prompt/tools", "general.md") + "\n\n" + get_file_content("prompt/tools", "file_viewer.md")
+
+    model = ChatGLM(model_type=model_type)
+
+    # 使用多轮对话替代单次调用，并获取完整对话历史
+    result, conversation_history = interactive_code_analysis(model, prompt)
+
+    # 输出最终结果
+    print("\n需要修改的函数:")
+    print(json.dumps(result, indent=2, ensure_ascii=False))
+
+    # 保存结果
+    result_dir = os.path.join(
+        f"result/locate_with_questions/{data_type}", commit_hash
+    )
+    os.makedirs(result_dir, exist_ok=True)
+    result_file_path = os.path.join(result_dir, f"{now_timestamp}.txt")
+    with open(result_file_path, "w", encoding="utf-8") as result_file:
+        result_file.write(json.dumps(result, indent=2, ensure_ascii=False))
+
+    # 保存日志（包含完整的对话历史）
+    logs_dir = os.path.join(
+        f"logs/locate_with_questions/{data_type}", commit_hash
+    )
+    os.makedirs(logs_dir, exist_ok=True)
+    logs_file_path = os.path.join(logs_dir, f"{now_timestamp}.txt")
+    with open(logs_file_path, "w", encoding="utf-8") as logs_file:
+        logs_file.write("=== 完整对话历史 ===\n\n")
+        # 格式化输出对话历史
+        for i, msg in enumerate(conversation_history):
+            role = msg["role"].capitalize()
+            content = msg["content"]
+            logs_file.write(f"--- {role} [{i + 1}/{len(conversation_history)}] ---\n")
+            logs_file.write(f"{content}\n\n")
+
+        logs_file.write("=== 最终结果 ===\n\n")
+        logs_file.write(json.dumps(result, indent=2, ensure_ascii=False))
+
+    print(f"\n结果已保存至: {result_file_path}")
+    print(f"日志已保存至: {logs_file_path}")
+
+    return result, conversation_history
+
+
 if __name__ == "__main__":
     spring_boot_folder = project_root
 
@@ -148,64 +214,8 @@ if __name__ == "__main__":
 
     print(f"\n已选择: Commit {selected_commit_hash} - {selected_commit_msg}")
 
-    checkout_result = checkout_to_parent_commit(project_root, selected_commit_hash)
-    if not checkout_result[0]:
-        print("git checkout 失败")
-        print(checkout_result)
-        exit()
+    selected_commit_data_type = os.path.splitext(selected_commit_filename)[0]
 
-    code_repo = concat_code_files(
-        project_root, filter=lambda x: x.endswith(".java"), use_relative_path=True
-    )
-
-    prompt = read_and_replace_prompt(
-        "prompt/locate_with_questions.txt",
-        {
-            "commit_hash": selected_commit_hash,
-            "commit_msg": selected_commit_msg,
-            "commit_type": selected_commit_type,
-            "code_repo": code_repo,
-        },
-    ) + "\n\n" + get_file_content("prompt/tools", "general.md") + "\n\n" + get_file_content("prompt/tools", "file_viewer.md")
-
-    model = ChatGLM(model_type=ModelType.GLM_4)
-
-    # 使用多轮对话替代单次调用，并获取完整对话历史
-    result, conversation_history = interactive_code_analysis(model, prompt)
-
-    # 输出最终结果
-    print("\n需要修改的函数:")
-    print(json.dumps(result, indent=2, ensure_ascii=False))
-
-    # 保存结果到文件
-    data_type = os.path.splitext(selected_commit_filename)[0]
-
-    # 保存结果
-    result_dir = os.path.join(
-        f"result/locate_with_questions/{data_type}", selected_commit_hash
-    )
-    os.makedirs(result_dir, exist_ok=True)
-    result_file_path = os.path.join(result_dir, f"{timestamp}.txt")
-    with open(result_file_path, "w", encoding="utf-8") as result_file:
-        result_file.write(json.dumps(result, indent=2, ensure_ascii=False))
-
-    # 保存日志（包含完整的对话历史）
-    logs_dir = os.path.join(
-        f"logs/locate_with_questions/{data_type}", selected_commit_hash
-    )
-    os.makedirs(logs_dir, exist_ok=True)
-    logs_file_path = os.path.join(logs_dir, f"{timestamp}.txt")
-    with open(logs_file_path, "w", encoding="utf-8") as logs_file:
-        logs_file.write("=== 完整对话历史 ===\n\n")
-        # 格式化输出对话历史
-        for i, msg in enumerate(conversation_history):
-            role = msg["role"].capitalize()
-            content = msg["content"]
-            logs_file.write(f"--- {role} [{i + 1}/{len(conversation_history)}] ---\n")
-            logs_file.write(f"{content}\n\n")
-
-        logs_file.write("=== 最终结果 ===\n\n")
-        logs_file.write(json.dumps(result, indent=2, ensure_ascii=False))
-
-    print(f"\n结果已保存至: {result_file_path}")
-    print(f"日志已保存至: {logs_file_path}")
+    locate_with_questions(spring_boot_folder,
+                          selected_commit_hash, selected_commit_msg, selected_commit_type, selected_commit_data_type,
+                          ModelType.GLM_4, timestamp)
