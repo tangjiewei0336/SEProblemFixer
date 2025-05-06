@@ -6,25 +6,25 @@
 
 1. 安装pip模块
 
-```shell
-pip install --upgrade "openai>=1.0"
-pip install --upgrade "volcengine-python-sdk[ark]"
-```
+   ```shell
+   pip install --upgrade "openai>=1.0"
+   pip install --upgrade "volcengine-python-sdk[ark]"
+   ```
 
 2. 在`config.py`中配置`API_KEY`和`base_url`。
 
-DeepSeeK官方的R1的API不支持JSON Output和Function Call，但火山引擎中的DeepSeeK-R1支持。
+   DeepSeeK官方的R1的API不支持JSON Output和Function Call，但火山引擎中的DeepSeeK-R1支持。
 
-同时，获取摘要的函数使用了火山引擎批量推理功能降低成本，因此运行代码必须配置火山引擎。
+   同时，获取摘要的函数使用了火山引擎批量推理功能降低成本，因此运行代码必须配置火山引擎。
 
-```python
-import os
+   ```python
+   import os
 
-deepseek_api_key = os.environ.get("ARK_API_KEY") # 记得设置系统环境变量`ARK_API_KEY`。
-deepseek_base_url = "https://ark.cn-beijing.volces.com/api/v3"
-deepseek_model = "" # your 在线推理 model Endpoint ID 
-deepseek_bi_model = "" # your 批量推理 model Endpoint ID
-```
+   deepseek_api_key = os.environ.get("ARK_API_KEY") # 记得设置系统环境变量`ARK_API_KEY`。
+   deepseek_base_url = "https://ark.cn-beijing.volces.com/api/v3"
+   deepseek_model = "" # your 在线推理 model Endpoint ID 
+   deepseek_bi_model = "" # your 批量推理 model Endpoint ID
+   ```
 
 ### 运行说明
 
@@ -50,3 +50,9 @@ deepseek_bi_model = "" # your 批量推理 model Endpoint ID
    > 参考资料: [Function Calling 使用说明](https://www.volcengine.com/docs/82379/1262342#function-calling%E9%80%82%E7%94%A8%E5%9C%BA%E6%99%AF)
 
 2. 使用DeepSeeK-R1进行多轮对话效果不好，无论如何修改System Prompt和User Prompt，模型从不询问问题。
+
+3. 对比GLM-4，在复杂任务表现更好，如"实现jwt"任务中，他有创建文件的想法而GLM-4没有。
+
+4. 新的问题：上下文长度受限。
+
+5. 未来探索：doubao-1.5-thinking-pro？
