@@ -95,3 +95,8 @@ if __name__ == "__main__":
 
     for file, summary in result.items():
         print(f"\n文件：{file}\n摘要：{summary}\n")
+
+    # 导出为excel
+    import pandas as pd
+    df = pd.DataFrame(list(result.items()), columns=['文件路径', '摘要'])
+    output_file = "spring_boot_summaries.xlsx"
