@@ -80,7 +80,7 @@ def chating(prompt, model):
             messages.append({"role": "user", "content": content})
         
         elif response_format == 'json':
-            print('LLM output final answer:')
+            print('LLM output final locate answer:')
             print(response)
             break
 
@@ -113,8 +113,10 @@ def locate(commit_type, commit_msg, commit_hash, commit_data_type):
         "commit_msg": commit_msg, 
         "commit_hash": commit_hash,
     })
-    print("RAG query result:")
+    print("RAG query finished.")
+    print("\n\n==========Locate Prompt==========")
     print(rag_result)
+    print("==========End of Locate Prompt==========\n\n")
 
     return chating(rag_result, ChatGLM(model_type=ModelType.GLM_4))
 

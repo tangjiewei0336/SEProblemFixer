@@ -38,6 +38,11 @@ def get_code_change_result(sb_project_root, commit_hash, commit_type, commit_mes
         },
     )
 
+    print("\n\n==========Prompt for Code Change==========")
+    print(prompt)
+    print("==========End of Prompt for Code Change==========\n\n")
+    print("Asking LLM for Code Changing...")
+
     model = ChatGLM(model_type=model_type)
 
     result = model(prompt)
