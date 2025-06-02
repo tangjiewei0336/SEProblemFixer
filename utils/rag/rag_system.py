@@ -50,7 +50,7 @@ class RAGSystem:
 
     def get_assembled_prompt(self, query, history, enable_fake_detect=False):
         prompt = self.prompt_str
-        prompt = prompt.replace("{question}", query)
+        prompt = prompt.replace("{{question}}", query)
 
         conversation_history = []
         if history is None:
@@ -61,12 +61,12 @@ class RAGSystem:
             elif message["role"] == "assistant":
                 conversation_history.append(f"AI: {message['content']}")
 
-        prompt = prompt.replace("{history}", "\n".join(conversation_history))
+        prompt = prompt.replace("{{history}}", "\n".join(conversation_history))
 
         retrieved_context = self.index.as_retriever(search_kwargs={"k": self.k}).get_relevant_documents(
             query + "\n".join(conversation_history))
 
-        prompt = prompt.replace("{context}", str(retrieved_context))
+        prompt = prompt.replace("{{context}}", str(retrieved_context))
 
         if enable_fake_detect:
             fake_str = self.index_fake.as_retriever(search_kwargs={"k": 1}).get_relevant_documents(query)
@@ -88,9 +88,6 @@ class RAGSystem:
 
         retrieved_context = self.index.as_retriever(search_kwargs={"k": self.k}).get_relevant_documents(
             query + "\n".join(conversation_history))
-        
-        print('=====RAG Retrieved context=====\n', retrieved_context, '\n=====End of RAG Retrieved context=====')
-
 
         return self.rag_chain.invoke(
         {"context": retrieved_context, "question": query, "history": conversation_history})

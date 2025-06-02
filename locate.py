@@ -5,6 +5,7 @@ from typing import List
 import pandas as pd
 
 from config import project_root
+from glm import ChatGLM, ModelType
 from locate_with_questions import display_commit_list
 from summarize import summarize_spring_boot_folder
 from utils.file_format_detect import detect_response_format
@@ -34,35 +35,38 @@ def create_index(summary_xlsx_path, content_column, source_column, output_path):
     print(f"RAG Index Saved to {output_path}.")
 
 
-def query(rag_index_filepath, rag_prompt_filepath, variables):
+def rag_query(rag_index_filepath, rag_prompt_filepath, variables):
     rag_prompt = read_and_replace_prompt(rag_prompt_filepath, variables)
     rag_system = RAGSystem.load_index(rag_index_filepath, rag_prompt)
+    return rag_system.get_assembled_prompt(rag_prompt, None)
 
-    history: List[dict] = []
+
+def chating(prompt, model):
+    messages = [{"role": "user", "content": prompt}]
 
     while True:
-        query_result = rag_system.query(rag_prompt, history)
-        history.append({
+        response = model.chat(messages).content
+        messages.append({
             "role": "assistant",
-            "content": query_result,
+            "content": response,
         })
-        response_format = detect_response_format(query_result)
+        response_format = detect_response_format(response)
 
         if response_format == 'text':
             print("Please answer LLM's question:")
-            print(query_result)
+            print(response)
             user_input = input("Your answer: ")
-            history.append({
+            messages.append({
                 "role": "user",
                 "content": user_input,
             })
         elif response_format == 'xml':
             print("LLM is viewing file:")
-            print(query_result)
+            print(response)
 
             tool_info_str = (
                 "<tool>"
-                + query_result.split("<tool>")[1].split("</tool>")[0]
+                + response.split("<tool>")[1].split("</tool>")[0]
                 + "</tool>"
             )
             parser = ToolParser(tool_info_str)
@@ -73,14 +77,14 @@ def query(rag_index_filepath, rag_prompt_filepath, variables):
             print("File content retrieved:")
             print(content)
 
-            history.append({"role": "user", "content": content})
+            messages.append({"role": "user", "content": content})
         
         elif response_format == 'json':
             print('LLM output final answer:')
-            print(query_result)
+            print(response)
             break
 
-    return history
+    return messages
 
 
 def get_summary_string(summary_excel):
@@ -130,11 +134,14 @@ if __name__ == "__main__":
         project_root, filter=lambda x: x.endswith(".java"), use_relative_path=True
     ).replace("{", "{{").replace("}", "}}")
 
-    rag_prompt_path = "prompt/locate.md"
-    rag_result = query(rag_index_path, rag_prompt_path, {
+    print("RAG querying...")
+    prompt_path = "prompt/locate.md"
+    rag_result = rag_query(rag_index_path, prompt_path, {
         "commit_type": commit_type,
         "commit_msg": commit_msg, 
         "commit_hash": commit_hash,
-        "summary": summary,
-        "code_repo": code_repo,
     })
+    print("RAG query result:")
+    print(rag_result)
+
+    chating(rag_result, ChatGLM(model_type=ModelType.GLM_4))

@@ -1,9 +1,5 @@
 # Locate
 
-## Background
-
-I gave you a summary of a Spring Boot project code repo when constructing your RAG System.
-
 ## Task
 
 Your task is to try to complement "{{commit_type}} {{commit_msg}}" in the code repo.
@@ -99,11 +95,10 @@ You now have access to specialized tools that empower you to assist users with s
     <filepath>src/components/Header.tsx</filepath>
   </action>
 </tool>
-
-````
-{context}
 ```
 
-## Code Repo
+## Some Context You May Need
 
-{{code_repo}}
+```
+{{context}}
+```
