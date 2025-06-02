@@ -28,6 +28,7 @@ def create_index(summary_xlsx_path, content_column, source_column, output_path):
     content_provider = RAGContentProvider(".")
     content_provider.add_excel_file(summary_xlsx_path,content_column,source_column)
     rag_system = RAGSystem.from_content_provider(content_provider, None)
+    print(f"Saving RAG Index...")
     rag_system.save_index(output_path)
     print(f"RAG Index Saved to {output_path}.")
 
@@ -35,11 +36,6 @@ def create_index(summary_xlsx_path, content_column, source_column, output_path):
 def query(rag_index_filepath, rag_prompt_filepath, variables):
     rag_prompt = read_and_replace_prompt(rag_prompt_filepath, variables)
     rag_system = RAGSystem.load_index(rag_index_filepath, rag_prompt)
-
-    print("RAG System Loaded. Ready to query.")
-    print("=====Prompt for RAG System=====")
-    print(rag_prompt)
-    print("=====End of Prompt for RAG System=====")
 
     history: List[dict] = []
 
