@@ -7,7 +7,7 @@ from config import project_root
 from locate_with_questions import display_commit_list
 from summarize import summarize_spring_boot_folder
 from utils.file_format_detect import detect_response_format
-from utils.files import read_and_replace_prompt
+from utils.files import concat_code_files, read_and_replace_prompt
 from utils.git import checkout_to_parent_commit
 from utils.rag.content_provider import RAGContentProvider
 from utils.rag.rag_system import RAGSystem
@@ -87,7 +87,6 @@ def query(rag_index_filepath, rag_prompt_filepath, variables):
 
 
 def get_summary_string(summary_excel):
-    print("Generating Summary String from Excel...")
     summary_df = pd.read_excel(summary_excel)
     summary_items = []
     for _, row in summary_df.iterrows():
@@ -95,7 +94,6 @@ def get_summary_string(summary_excel):
         content = str(row[summary_content_column])
         summary_items.append(f"文件路径: {file_path}\n摘要: {content}")
     result = "\n\n".join(summary_items)
-    print("Summary String Generated.")
     return result
 
 
@@ -131,10 +129,15 @@ if __name__ == "__main__":
     else:
         create_index(summary_path, summary_content_column, summary_source_column, rag_index_path)
 
+    code_repo = concat_code_files(
+        project_root, filter=lambda x: x.endswith(".java"), use_relative_path=True
+    ).replace("{", "{{").replace("}", "}}")
+
     rag_prompt_path = "prompt/locate.md"
     rag_result = query(rag_index_path, rag_prompt_path, {
         "commit_type": commit_type,
         "commit_msg": commit_msg, 
         "commit_hash": commit_hash,
         "summary": summary,
+        "code_repo": code_repo,
     })
