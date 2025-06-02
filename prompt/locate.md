@@ -10,7 +10,7 @@ You need to decide which function is needed to be deleted or updated, and consid
 Strictly answer in following json format. Do not add any words. Do not add any comments. Do not make up parts. Do not prepend or append any words to the json.
 [
     {{
-        "file": "the_file_name",
+        "file": "the_whole_file_path",
         "function": "the_function_name",
         "operation": "delete" or "create" or "update",
     }},
