@@ -17,10 +17,12 @@ def get_code_change_result(sb_project_root, commit_hash, commit_type, commit_mes
         print("git checkout 失败")
         print(checkout_result)
         exit()
-
-    code_repo = concat_code_files(
-        sb_project_root, filter=lambda x: x.endswith(".java"), use_relative_path=True
-    )
+    
+    locate_result = locate_result.replace("```json", "").replace("```", "").strip()
+    locate_result_json = json.loads(locate_result)
+    related_files = dict()
+    for item in locate_result_json:
+        related_files[item["file"]] = get_file_content(item["file"])
 
     prompt = read_and_replace_prompt(
         "prompt/code_change.txt",
@@ -28,11 +30,11 @@ def get_code_change_result(sb_project_root, commit_hash, commit_type, commit_mes
             "commit_hash": commit_hash,
             "commit_msg": commit_message,
             "commit_type": commit_type,
-            "code_repo": code_repo,
             "code_modification_example": get_file_content("modifier/code_modification_example.json"),
             "locate_result": locate_result,
             "repo_name": "autodrive",
             "code_change_schema": get_file_content("modifier/code-change.schema.json"),
+            "related_files": str(related_files),
         },
     )
 

@@ -19,5 +19,5 @@ commit_hash: {{commit_hash}}
 Here are your companion's advice:
 {{locate_result}}
 
-Here are the code repo:
-{{code_repo}}
+Here are the related files:
+{{related_files}}
