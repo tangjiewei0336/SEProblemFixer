@@ -4,7 +4,7 @@ from langchain_community.vectorstores import FAISS
 from langchain_core.output_parsers import StrOutputParser
 from langchain_core.prompts import ChatPromptTemplate
 
-from glm import ChatGLM
+from glm import ChatGLM, ModelType
 from .embedding import GLMEmbeddings
 from .content_provider import RAGContentProvider
 
@@ -76,7 +76,7 @@ class RAGSystem:
         return prompt
 
 
-    def query(self, query, history: List[dict] = None, enable_fake_detect = False):
+    def query(self, query, history: List[dict] = None):
         conversation_history = []
         if history is None:
             history = []
@@ -91,14 +91,9 @@ class RAGSystem:
         
         print('=====RAG Retrieved context=====\n', retrieved_context, '\n=====End of RAG Retrieved context=====')
 
-        if enable_fake_detect:
-            fake_str = self.index_fake.as_retriever(search_kwargs={"k": 1}).get_relevant_documents(query)
-            return self.rag_chain.invoke(
-                {"context": retrieved_context, "question": query, "history": conversation_history,
-                 "fake": fake_str})
-        else:
-            return self.rag_chain.invoke(
-            {"context": retrieved_context, "question": query, "history": conversation_history})
+
+        return self.rag_chain.invoke(
+        {"context": retrieved_context, "question": query, "history": conversation_history})
 
     def save_index(self, path):
         bytes = self.index.serialize_to_bytes()

@@ -63,7 +63,7 @@ You now have access to specialized tools that empower you to assist users with s
 ### Execution Format:
 
 - Return an XML markdown code block.
-- Include the file's full path, filename in the XML structure.
+- Include the file's full path, filename in the XML structure. This can be found in Source section of RAG retrieved context.
 - Follow the XML schema exactly.
 
 ### XML Schema:
@@ -101,3 +101,4 @@ You now have access to specialized tools that empower you to assist users with s
 </tool>
 
 ````
+{context}
