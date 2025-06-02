@@ -1,14 +1,17 @@
 import os
+from typing import List
 
 import pandas as pd
 
 from config import project_root
 from locate_with_questions import display_commit_list
 from summarize import summarize_spring_boot_folder
+from utils.file_format_detect import detect_response_format
 from utils.files import read_and_replace_prompt
 from utils.git import checkout_to_parent_commit
 from utils.rag.content_provider import RAGContentProvider
 from utils.rag.rag_system import RAGSystem
+from utils.tool.file_viewer import ToolParser, get_file_content
 
 
 def save_summary_xlsx(spring_boot_folder, output_path, content_column, source_column, max_workers=50):
@@ -32,7 +35,55 @@ def create_index(summary_xlsx_path, content_column, source_column, output_path):
 def query(rag_index_filepath, rag_prompt_filepath, variables):
     rag_prompt = read_and_replace_prompt(rag_prompt_filepath, variables)
     rag_system = RAGSystem.load_index(rag_index_filepath, rag_prompt)
-    return rag_system.query(rag_prompt)
+
+    print("RAG System Loaded. Ready to query.")
+    print("=====Prompt for RAG System=====")
+    print(rag_prompt)
+    print("=====End of Prompt for RAG System=====")
+
+    history: List[dict] = []
+
+    while True:
+        query_result = rag_system.query(rag_prompt, history)
+        history.append({
+            "role": "assistant",
+            "content": query_result,
+        })
+        response_format = detect_response_format(query_result)
+
+        if response_format == 'text':
+            print("Please answer LLM's question:")
+            print(query_result)
+            user_input = input("Your answer: ")
+            history.append({
+                "role": "user",
+                "content": user_input,
+            })
+        elif response_format == 'xml':
+            print("LLM is viewing file:")
+            print(query_result)
+
+            tool_info_str = (
+                "<tool>"
+                + query_result.split("<tool>")[1].split("</tool>")[0]
+                + "</tool>"
+            )
+            parser = ToolParser(tool_info_str)
+            parser.parse()
+            tool_info = parser.get_tool_info()
+            content = get_file_content(os.path.join(project_root, tool_info["filepath"]))
+
+            print("File content retrieved:")
+            print(content)
+
+            history.append({"role": "user", "content": content})
+        
+        elif response_format == 'json':
+            print('LLM output final answer:')
+            print(query_result)
+            break
+
+    return history
 
 
 def get_summary_string(summary_excel):
@@ -87,4 +138,3 @@ if __name__ == "__main__":
         "commit_hash": commit_hash,
         "summary": summary,
     })
-    print(rag_result)

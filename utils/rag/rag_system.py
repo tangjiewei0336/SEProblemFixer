@@ -88,6 +88,8 @@ class RAGSystem:
 
         retrieved_context = self.index.as_retriever(search_kwargs={"k": self.k}).get_relevant_documents(
             query + "\n".join(conversation_history))
+        
+        print('=====RAG Retrieved context=====\n', retrieved_context, '\n=====End of RAG Retrieved context=====')
 
         if enable_fake_detect:
             fake_str = self.index_fake.as_retriever(search_kwargs={"k": 1}).get_relevant_documents(query)

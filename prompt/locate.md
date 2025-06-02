@@ -30,6 +30,10 @@ You must come across doubts when viewing the code repo, so you can reply with yo
 
 You must ask at least one question before you output your final answer.
 
+Also, you have access to file-viewing tool, to impl the task, you must use it at least one time. The tool usage is below.
+
+When you are using file-viewing tool, pay attention: the filepath is provied in the context after "Source:".
+
 ## Tools Access and Execution Guidelines
 
 ### Overview
