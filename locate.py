@@ -80,12 +80,11 @@ if __name__ == "__main__":
     else:
         create_index(summary_path, summary_content_column, summary_source_column, rag_index_path)
 
-    rag_prompt_path = "prompt/rag.txt"
+    rag_prompt_path = "prompt/locate.md"
     rag_result = query(rag_index_path, rag_prompt_path, {
         "commit_type": commit_type,
         "commit_msg": commit_msg, 
         "commit_hash": commit_hash,
         "summary": summary,
     })
-    print("RAG Query Result:")
     print(rag_result)
