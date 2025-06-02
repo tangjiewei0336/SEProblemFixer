@@ -5,13 +5,14 @@ import time
 
 from config import project_root
 from glm import ModelType, ChatGLM
+from locate import chating
 from locate_with_questions import display_commit_list, locate_with_questions
 from utils.files import concat_code_files, read_and_replace_prompt
 from utils.git import checkout_to_parent_commit
 from utils.tool.file_viewer import get_file_content
 
 
-def get_code_change_result(sb_project_root, commit_hash, commit_type, commit_message, model_type, locate_result):
+def get_code_change_result(sb_project_root, commit_hash, commit_type, commit_message, model_type, locate_result, rag_context):
     checkout_result = checkout_to_parent_commit(sb_project_root, commit_hash)
     if not checkout_result[0]:
         print("git checkout 失败")
@@ -25,7 +26,7 @@ def get_code_change_result(sb_project_root, commit_hash, commit_type, commit_mes
         related_files[item["file"]] = get_file_content(item["file"])
 
     prompt = read_and_replace_prompt(
-        "prompt/code_change.txt",
+        "prompt/code_change.md",
         {
             "commit_hash": commit_hash,
             "commit_msg": commit_message,
@@ -35,6 +36,7 @@ def get_code_change_result(sb_project_root, commit_hash, commit_type, commit_mes
             "repo_name": "autodrive",
             "code_change_schema": get_file_content("modifier/code-change.schema.json"),
             "related_files": str(related_files),
+            "context": str(rag_context),
         },
     )
 
@@ -45,9 +47,9 @@ def get_code_change_result(sb_project_root, commit_hash, commit_type, commit_mes
 
     model = ChatGLM(model_type=model_type)
 
-    result = model(prompt)
+    chating_messages = chating(prompt, model)
 
-    return str(result)
+    return str(chating_messages[-1]["content"]).strip()
 
 
 if __name__ == "__main__":

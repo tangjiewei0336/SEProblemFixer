@@ -52,10 +52,10 @@ if __name__ == "__main__":
         else:
             print("git checkout success")
         
-        locate_history = locate(commit_type, commit_msg, commit_hash, commit_data_type)
+        locate_history, rag_context = locate(commit_type, commit_msg, commit_hash, commit_data_type)
         locate_result = locate_history[-1]["content"]
 
-        code_change_result = get_code_change_result(project_root, commit_hash, commit_type, commit_msg, ModelType.GLM_4, locate_result)
+        code_change_result = get_code_change_result(project_root, commit_hash, commit_type, commit_msg, ModelType.GLM_4, locate_result, rag_context)
         
         if code_change_result.startswith("```json"):
             code_change_result = code_change_result[7:]  # 去除前置的```json

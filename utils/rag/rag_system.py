@@ -73,7 +73,7 @@ class RAGSystem:
 
             prompt = prompt.replace("{fake}", str(fake_str))
 
-        return prompt
+        return prompt, retrieved_context
 
 
     def query(self, query, history: List[dict] = None):
