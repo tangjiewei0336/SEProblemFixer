@@ -87,15 +87,36 @@ def chating(prompt, model):
     return messages
 
 
-def get_summary_string(summary_excel):
-    summary_df = pd.read_excel(summary_excel)
-    summary_items = []
-    for _, row in summary_df.iterrows():
-        file_path = str(row[summary_source_column])
-        content = str(row[summary_content_column])
-        summary_items.append(f"文件路径: {file_path}\n摘要: {content}")
-    result = "\n\n".join(summary_items)
-    return result
+def locate(commit_type, commit_msg, commit_hash, commit_data_type):
+    summary_content_column = "摘要"
+    summary_source_column = "文件路径"
+
+    summary_path = f"summary/{commit_data_type}/{commit_hash}.xlsx"
+    os.makedirs(os.path.dirname(summary_path), exist_ok=True)
+
+    if os.path.exists(summary_path):
+        print("Summary Excel already exists. Skipping summary generation.")
+    else:
+        save_summary_xlsx(project_root, summary_path, summary_content_column, summary_source_column, max_workers=50)
+
+    rag_index_path = f"rag_index/{commit_data_type}/{commit_hash}.index"
+    os.makedirs(os.path.dirname(rag_index_path), exist_ok=True)
+    if os.path.exists(rag_index_path):
+        print("RAG Index already exists. Skipping index creation.")
+    else:
+        create_index(summary_path, summary_content_column, summary_source_column, rag_index_path)
+
+    print("RAG querying...")
+    prompt_path = "prompt/locate.md"
+    rag_result = rag_query(rag_index_path, prompt_path, {
+        "commit_type": commit_type,
+        "commit_msg": commit_msg, 
+        "commit_hash": commit_hash,
+    })
+    print("RAG query result:")
+    print(rag_result)
+
+    return chating(rag_result, ChatGLM(model_type=ModelType.GLM_4))
 
 
 if __name__ == "__main__":
@@ -110,38 +131,4 @@ if __name__ == "__main__":
     else:
         print("git checkout success")
 
-    summary_content_column = "摘要"
-    summary_source_column = "文件路径"
-
-    summary_path = f"summary/{commit_data_type}/{commit_hash}.xlsx"
-    os.makedirs(os.path.dirname(summary_path), exist_ok=True)
-
-    if os.path.exists(summary_path):
-        print("Summary Excel already exists. Skipping summary generation.")
-    else:
-        save_summary_xlsx(project_root, summary_path, summary_content_column, summary_source_column, max_workers=50)
-
-    summary = get_summary_string(summary_path)
-
-    rag_index_path = f"rag_index/{commit_data_type}/{commit_hash}.index"
-    os.makedirs(os.path.dirname(rag_index_path), exist_ok=True)
-    if os.path.exists(rag_index_path):
-        print("RAG Index already exists. Skipping index creation.")
-    else:
-        create_index(summary_path, summary_content_column, summary_source_column, rag_index_path)
-
-    code_repo = concat_code_files(
-        project_root, filter=lambda x: x.endswith(".java"), use_relative_path=True
-    ).replace("{", "{{").replace("}", "}}")
-
-    print("RAG querying...")
-    prompt_path = "prompt/locate.md"
-    rag_result = rag_query(rag_index_path, prompt_path, {
-        "commit_type": commit_type,
-        "commit_msg": commit_msg, 
-        "commit_hash": commit_hash,
-    })
-    print("RAG query result:")
-    print(rag_result)
-
-    chating(rag_result, ChatGLM(model_type=ModelType.GLM_4))
+    locate(commit_type, commit_msg, commit_hash, commit_data_type)
