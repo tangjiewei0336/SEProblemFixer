@@ -1,4 +1,5 @@
 import os
+import pathlib
 from typing import List
 
 import pandas as pd
@@ -67,7 +68,7 @@ def query(rag_index_filepath, rag_prompt_filepath, variables):
             parser = ToolParser(tool_info_str)
             parser.parse()
             tool_info = parser.get_tool_info()
-            content = get_file_content(os.path.join(project_root, tool_info["filepath"]))
+            content = get_file_content(os.path.join(pathlib.Path(project_root).parent, tool_info["filepath"]))
 
             print("File content retrieved:")
             print(content)

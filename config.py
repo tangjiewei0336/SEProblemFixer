@@ -1,1 +1,1 @@
-project_root = ""
+project_root = "./autodrive"
