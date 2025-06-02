@@ -5,6 +5,7 @@ import pandas as pd
 from config import project_root
 from locate_with_questions import display_commit_list
 from summarize import summarize_spring_boot_folder
+from utils.git import checkout_to_parent_commit
 from utils.rag.content_provider import RAGContentProvider
 from utils.rag.rag_system import RAGSystem
 
@@ -30,6 +31,15 @@ def create_index(summary_xlsx_path, content_column, source_column, output_path):
 if __name__ == "__main__":
     commit_type, commit_msg, commit_hash, commit_filename = display_commit_list()
     commit_data_type = os.path.splitext(commit_filename)[0]
+
+    checkout_result = checkout_to_parent_commit(project_root, commit_hash)
+    if not checkout_result[0]:
+        print("git checkout fail:")
+        print(checkout_result)
+        exit()
+    else:
+        print("git checkout success")
+
     summary_content_column = "摘要"
     summary_source_column = "文件路径"
 
@@ -41,7 +51,7 @@ if __name__ == "__main__":
     else:
         save_summary_xlsx(project_root, summary_path, summary_content_column, summary_source_column, max_workers=50)
 
-    rag_index_path = f"rag_index/{commit_filename}/{commit_hash}.index"
+    rag_index_path = f"rag_index/{commit_data_type}/{commit_hash}.index"
     os.makedirs(os.path.dirname(rag_index_path), exist_ok=True)
     if os.path.exists(rag_index_path):
         print("RAG Index already exists. Skipping index creation.")
