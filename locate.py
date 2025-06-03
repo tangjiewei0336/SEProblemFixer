@@ -72,7 +72,11 @@ def chating(prompt, model):
             parser = ToolParser(tool_info_str)
             parser.parse()
             tool_info = parser.get_tool_info()
-            content = get_file_content(os.path.join(pathlib.Path(project_root).parent, tool_info["filepath"]))
+
+            if tool_info["filepath"].startswith("./"):
+                content = get_file_content(tool_info["filepath"])
+            else:
+                content = get_file_content(os.path.join(pathlib.Path(project_root).parent, tool_info["filepath"]))
 
             print("File content retrieved:")
             print(content)
