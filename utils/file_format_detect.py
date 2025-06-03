@@ -22,10 +22,8 @@ def detect_response_format(response: str) -> str:
                 # 提取代码块中的内容
                 json_content = response[7:-3].strip()
             
-            if (json_content.startswith('[') and json_content.endswith(']')) or \
-               (json_content.startswith('{') and json_content.endswith('}')):
-                json.loads(json_content)
-                return True
+            json.loads(json_content)
+            return True
         except (json.JSONDecodeError, ValueError):
             pass
         return False
